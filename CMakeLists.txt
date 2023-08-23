@@ -1,6 +1,39 @@
-cmake_minimum_required(VERSION 3.26)
+cmake_minimum_required(VERSION 3.14)
 project(robot_code)
 
 set(CMAKE_CXX_STANDARD 17)
 
 add_executable(robot_code main.cpp)
+
+# include FetchContent and ExternalProject
+include(FetchContent)
+include(ExternalProject)
+
+# Adafruit Motor Hat Library
+FetchContent_Declare(
+  AdafruitStepperMotorHAT_CPP
+  GIT_REPOSITORY https://github.com/gaborszita/AdafruitStepperMotorHAT_CPP.git
+  GIT_TAG 1df858e58fbc452ceffdc7d101e050c8131aefd2
+)
+FetchContent_MakeAvailable(AdafruitStepperMotorHAT_CPP)
+
+target_include_directories(robot_code PRIVATE ${adafruitsteppermotorhat_cpp_SOURCE_DIR})
+target_link_libraries(robot_code PRIVATE Adafruit_MotorHAT)
+
+# RPLIDAR SDK
+ExternalProject_Add(
+  RPLIDAR_SDK
+  GIT_REPOSITORY https://github.com/gaborszita/rplidar_sdk
+  GIT_TAG 89b7dbdc5a02c92a8648124d4dcb05fbf3fafcb3
+  BUILD_COMMAND make -C sdk
+  CONFIGURE_COMMAND ""
+  INSTALL_COMMAND ""
+  BUILD_IN_SOURCE TRUE
+)
+
+ExternalProject_Get_Property(RPLIDAR_SDK SOURCE_DIR BINARY_DIR)
+target_include_directories(robot_code PRIVATE ${SOURCE_DIR}/sdk/sdk/include)
+target_link_directories(robot_code PRIVATE ${BINARY_DIR}/sdk/output/${CMAKE_SYSTEM_NAME}/Release)
+target_link_libraries(robot_code PRIVATE rplidar_sdk)
+target_link_libraries(robot_code PRIVATE pthread) # RPLIDAR SDK needs pthread
+add_dependencies(robot_code RPLIDAR_SDK)
