@@ -1,4 +1,5 @@
 #include <iostream>
+#include <unistd.h>
 
 #include "rplidar.h"
 #include "Adafruit_MotorHAT.h"
@@ -19,7 +20,7 @@ int main() {
     std::cout << mg.getXAngle() << std::endl;
   }*/
 
-  LidarManager lm;
+  /*LidarManager lm;
   lm.quickStart();
   rplidar_response_measurement_node_hq_t nodes[8192];
   size_t nodeCount = sizeof(nodes)/sizeof(rplidar_response_measurement_node_hq_t);
@@ -31,7 +32,18 @@ int main() {
     float distance_in_meters = node.dist_mm_q2 / 1000.f / (1 << 2);
     std::cout << angle_in_degrees << " " << distance_in_meters << std::endl;
   }
-  lm.quickStop();
+  lm.quickStop();*/
+
+  GyroManager gm;
+  gm.quickStart();
+  double gyroxsum, gyroysum, gyrozsum, accelxsum, accelysum, accelzsum;
+  for(int i=0; i<6; i++) {
+    std::cout << "gyro x: " << gm.getGyroX() << std::endl;
+    std::cout << "gyro y: " << gm.getGyroY() << std::endl;
+    std::cout << "gyro z: " << gm.getGyroZ() << std::endl;
+    sleep(1);
+  }
+  gm.quickStop();
 
   return 0;
 }
