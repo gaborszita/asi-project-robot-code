@@ -5,6 +5,7 @@
 #include "Adafruit_MotorHAT.h"
 #include "DeviceManagers/GyroManager.hpp"
 #include "DeviceManagers/LidarManager.hpp"
+#include "DeviceManagers/MouseManager.hpp"
 
 Adafruit_MotorHAT hat;
 
@@ -34,7 +35,7 @@ int main() {
   }
   lm.quickStop();*/
 
-  GyroManager gm;
+  /*GyroManager gm;
   gm.quickStart();
   double gyroxsum, gyroysum, gyrozsum, accelxsum, accelysum, accelzsum;
   for(int i=0; i<6; i++) {
@@ -43,7 +44,14 @@ int main() {
     std::cout << "gyro z: " << gm.getGyroZ() << std::endl;
     sleep(1);
   }
-  gm.quickStop();
+  gm.quickStop();*/
+
+  MouseManager mg;
+  mg.quickStart();
+  while (1) {
+    std::cout << mg.getX() << " " << mg.getY() << std::endl;
+    sleep(0.5);
+  }
 
   return 0;
 }

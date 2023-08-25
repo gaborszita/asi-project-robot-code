@@ -9,10 +9,13 @@ namespace RobotCode::DeviceManagers {
 
 class MouseManager {
  public:
+  ~MouseManager();
+  void quickStart();
+  void quickStop();
   void startMouseThread();
   void stopMouseThread();
-  [[nodiscard]] int getX() const;
-  [[nodiscard]] int getY() const;
+  [[nodiscard]] float getX() const;
+  [[nodiscard]] float getY() const;
  private:
   void update();
   std::thread updateThread;
@@ -21,7 +24,8 @@ class MouseManager {
   std::mutex threadMutex;
   std::condition_variable threadCond;
 
-  int x, y = 0;
+  float x = 0;
+  float y = 0;
   static const std::string mouseDevicePath;
   // dots per centimeter(dpcm) NOT dots per inch(DPI),
   // convert DPI to dpcm by multiplying DPI by 0.393
