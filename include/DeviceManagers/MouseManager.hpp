@@ -9,20 +9,13 @@ namespace RobotCode::DeviceManagers {
 
 class MouseManager {
  public:
-  ~MouseManager();
   void quickStart();
-  void quickStop();
   void startMouseThread();
-  void stopMouseThread();
   [[nodiscard]] float getX() const;
   [[nodiscard]] float getY() const;
  private:
-  void update();
-  std::thread updateThread;
+  [[noreturn]] void update();
   bool threadRunning = false;
-  bool threadInterrupt = false;
-  std::mutex threadMutex;
-  std::condition_variable threadCond;
 
   float x = 0;
   float y = 0;
