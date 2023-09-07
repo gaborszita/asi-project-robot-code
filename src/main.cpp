@@ -48,9 +48,11 @@ int main() {
 
   MouseManager mg;
   mg.quickStart();
-  while (1) {
+  int i=0;
+  while (i<1000) {
     std::cout << mg.getX() << " " << mg.getY() << std::endl;
-    sleep(0.5);
+    sleep(1);
+    i++;
   }
 
   return 0;
