@@ -37,8 +37,9 @@ float MouseManager::getY() const {
     if (mouseDevice) {
       auto xRead = static_cast<signed char>(data[1]);
       auto yRead = static_cast<signed char>(data[2]);
-      x += (float) xRead / MOUSE_DOTS_PER_METER;
-      y += (float) yRead / MOUSE_DOTS_PER_METER;
+      std::atomic<long> xff{};
+      x.fetch_add((float) xRead / MOUSE_DOTS_PER_METER);
+      y.fetch_add((float) yRead / MOUSE_DOTS_PER_METER);
     }
   }
 }

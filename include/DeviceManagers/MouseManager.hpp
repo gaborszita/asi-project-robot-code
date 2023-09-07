@@ -4,6 +4,7 @@
 #include <thread>
 #include <mutex>
 #include <condition_variable>
+#include <atomic>
 
 namespace RobotCode::DeviceManagers {
 
@@ -17,8 +18,8 @@ class MouseManager {
   [[noreturn]] void update();
   bool threadRunning = false;
 
-  float x = 0;
-  float y = 0;
+  std::atomic<float> x = 0;
+  std::atomic<float> y = 0;
   static const std::string mouseDevicePath;
   // dots per centimeter(dpcm) NOT dots per inch(DPI),
   // convert DPI to dpcm by multiplying DPI by 0.393

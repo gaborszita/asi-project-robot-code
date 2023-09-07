@@ -91,9 +91,9 @@ void GyroManager::update() {
     auto dt = endTime - startTime;
     startTime = endTime;
     float dtSeconds = std::chrono::duration_cast<std::chrono::duration<float>>(dt).count();
-    gyroX += gyroXRaw * dtSeconds;
-    gyroY += gyroYRaw * dtSeconds;
-    gyroZ += gyroZRaw * dtSeconds;
+    gyroX.fetch_add(gyroXRaw * dtSeconds);
+    gyroY.fetch_add(gyroYRaw * dtSeconds);
+    gyroZ.fetch_add(gyroZRaw * dtSeconds);
   }
 }
 

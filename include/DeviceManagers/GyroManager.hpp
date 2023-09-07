@@ -4,6 +4,7 @@
 #include <thread>
 #include <mutex>
 #include <condition_variable>
+#include <atomic>
 
 namespace RobotCode::DeviceManagers {
 
@@ -66,9 +67,9 @@ class GyroManager {
   constexpr static const float ACCEL_Y_OFFSET = +0.072;
   constexpr static const float ACCEL_Z_OFFSET = +0.96;
 
-  float gyroX = 0;
-  float gyroY = 0;
-  float gyroZ = 0;
+  std::atomic<float> gyroX = 0;
+  std::atomic<float> gyroY = 0;
+  std::atomic<float> gyroZ = 0;
 
   std::thread updateThread;
   bool threadRunning = false;

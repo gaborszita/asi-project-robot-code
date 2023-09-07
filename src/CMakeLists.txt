@@ -1,4 +1,4 @@
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 
 add_executable(
   robot_code
@@ -28,7 +28,7 @@ target_link_libraries(robot_code PRIVATE Adafruit_MotorHAT)
 ExternalProject_Add(
   rplidar_sdk_proj
   GIT_REPOSITORY https://github.com/gaborszita/rplidar_sdk
-  GIT_TAG 89b7dbdc5a02c92a8648124d4dcb05fbf3fafcb3
+  GIT_TAG 3cf88ab727a90861afa60319ab04aa6d292da2fe
   BUILD_COMMAND make -C sdk
   CONFIGURE_COMMAND ""
   INSTALL_COMMAND ""
