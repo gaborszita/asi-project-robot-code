@@ -8,6 +8,8 @@
 #include "DeviceManagers/GyroManager.hpp"
 #include "DeviceManagers/LidarManager.hpp"
 #include "DeviceManagers/MouseManager.hpp"
+#include "DeviceManagers/ReflectanceSensorManager.hpp"
+#include <bitset>
 
 #include "Utilities/PID.hpp"
 
@@ -51,7 +53,7 @@ int main() {
   }
   gm.quickStop();*/
 
-  MouseManager mg;
+  /*MouseManager mg;
   //mg.quickStart();
   int i=0;
   auto targetTimeNano = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::milliseconds(1)).count();
@@ -82,6 +84,15 @@ int main() {
     lastNano = std::chrono::duration_cast<std::chrono::nanoseconds>(finish-start).count();
     firstRun = false;
     i++;
+  }*/
+
+  ReflectanceSensorManager rsm(std::chrono::microseconds(100));
+  rsm.quickStart();
+
+  while (1) {
+    //sleep(1);
+    char val = rsm.getSensorValues();
+    std::cout << std::bitset<8>(val) << std::endl;
   }
 
   return 0;
