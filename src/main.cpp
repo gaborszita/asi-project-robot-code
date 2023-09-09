@@ -1,5 +1,7 @@
 #include <iostream>
 #include <unistd.h>
+#include <chrono>
+#include <thread>
 
 #include "rplidar.h"
 #include "Adafruit_MotorHAT.h"
@@ -7,9 +9,12 @@
 #include "DeviceManagers/LidarManager.hpp"
 #include "DeviceManagers/MouseManager.hpp"
 
+#include "Utilities/PID.hpp"
+
 Adafruit_MotorHAT hat;
 
 using namespace RobotCode::DeviceManagers;
+
 
 int main() {
   std::cout << "Hello, World!" << std::endl;
@@ -47,11 +52,35 @@ int main() {
   gm.quickStop();*/
 
   MouseManager mg;
-  mg.quickStart();
+  //mg.quickStart();
   int i=0;
-  while (i<1000) {
-    std::cout << mg.getX() << " " << mg.getY() << std::endl;
-    sleep(1);
+  auto targetTimeNano = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::milliseconds(1)).count();
+  PID pid(0.1, 0.0, -targetTimeNano, 0, 0.0, 1);
+  bool firstRun = true;
+  long long lastNano;
+  long long waitTimeNano;
+  while (i<1000000000) {
+    //std::cout << mg.getX() << " " << mg.getY() << std::endl;
+    sleep(0.0001);
+      if (!firstRun) {
+          std::cout << "last nano: " << (double) lastNano << std::endl;
+          std::cout << "target nano: " << (double) targetTimeNano << std::endl;
+          std::cout << "pid out: " << pid.calculate(targetTimeNano, lastNano) << std ::endl;
+          waitTimeNano = targetTimeNano + pid.calculate(targetTimeNano, lastNano);
+          std::cout << "wait time: " << waitTimeNano << std::endl;
+      } else {
+          waitTimeNano = targetTimeNano;
+      }
+    auto start = std::chrono::high_resolution_clock::now();
+
+
+    std::this_thread::sleep_for(std::chrono::nanoseconds ((long long) waitTimeNano));
+      //auto between = std::chrono::high_resolution_clock::now();
+
+      auto finish = std::chrono::high_resolution_clock::now();
+    std::cout << std::chrono::duration_cast<std::chrono::nanoseconds>(finish-start).count() << "ns\n";
+    lastNano = std::chrono::duration_cast<std::chrono::nanoseconds>(finish-start).count();
+    firstRun = false;
     i++;
   }
 

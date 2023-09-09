@@ -6,6 +6,7 @@ add_executable(
   DeviceManagers/LidarManager.cpp
   DeviceManagers/GyroManager.cpp
   DeviceManagers/MouseManager.cpp
+  Utilities/PID.cpp
 )
 target_include_directories(robot_code PRIVATE ../include)
 
