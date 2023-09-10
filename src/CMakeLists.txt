@@ -7,6 +7,7 @@ add_executable(
   DeviceManagers/GyroManager.cpp
   DeviceManagers/MouseManager.cpp
   DeviceManagers/ReflectanceSensorManager.cpp
+  DeviceManagers/DriveMotorManager.cpp
   Utilities/PID.cpp
 )
 target_include_directories(robot_code PRIVATE ../include)

@@ -9,6 +9,7 @@
 #include "DeviceManagers/LidarManager.hpp"
 #include "DeviceManagers/MouseManager.hpp"
 #include "DeviceManagers/ReflectanceSensorManager.hpp"
+#include "DeviceManagers/DriveMotorManager.hpp"
 #include <bitset>
 
 #include "Utilities/PID.hpp"
@@ -89,11 +90,25 @@ int main() {
   ReflectanceSensorManager rsm(std::chrono::microseconds(100));
   rsm.quickStart();
 
-  while (1) {
+  /*while (1) {
     //sleep(1);
     char val = rsm.getSensorValues();
     std::cout << std::bitset<8>(val) << std::endl;
-  }
+  }*/
+
+  DriveMotorManager dgm;
+  dgm.runMotor(DriveMotorManager::BackRight, DriveMotorManager::Forward, 100);
+  sleep(2);
+  dgm.releaseMotor(DriveMotorManager::BackRight);
+  dgm.runMotor(DriveMotorManager::BackLeft, DriveMotorManager::Forward, 100);
+  sleep(2);
+  dgm.releaseMotor(DriveMotorManager::BackLeft);
+  dgm.runMotor(DriveMotorManager::FrontLeft, DriveMotorManager::Forward, 100);
+  sleep(2);
+  dgm.releaseMotor(DriveMotorManager::FrontLeft);
+  dgm.runMotor(DriveMotorManager::FrontRight, DriveMotorManager::Forward, 100);
+  sleep(2);
+  dgm.releaseMotor(DriveMotorManager::FrontRight);
 
   return 0;
 }
