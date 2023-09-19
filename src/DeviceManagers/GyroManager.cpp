@@ -54,7 +54,9 @@ void GyroManager::stopUpdateThread() {
   if (!threadRunning) {
     throw std::logic_error("GyroManager update thread not running.");
   }
+  threadMutex.lock();
   threadInterrupt = true;
+  threadMutex.unlock();
   threadCond.notify_all();
   updateThread.join();
   threadRunning = false;
