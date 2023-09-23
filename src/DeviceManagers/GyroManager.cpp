@@ -2,8 +2,24 @@
 #include <wiringPiI2C.h>
 #include <chrono>
 #include <thread>
+#include <boost/log/attributes.hpp>
+#include <boost/log/sources/record_ostream.hpp>
+#include <boost/log/utility/manipulators.hpp>
+#include <boost/log/keywords/channel.hpp>
+#include "Utilities/TimeManager.hpp"
+
+namespace logging = boost::log;
+namespace keywords = boost::log::keywords;
+namespace attrs = boost::log::attributes;
+
+using namespace RobotCode::Utilities;
 
 namespace RobotCode::DeviceManagers {
+
+GyroManager::GyroManager() :
+    m_logger(keywords::channel = "device") {
+  m_logger.add_attribute("Device", attrs::constant<std::string>("Gyro"));
+}
 
 void GyroManager::initialize() {
   if (initialized) {
@@ -77,11 +93,21 @@ void GyroManager::quickStop() {
   shutdown();
 }
 
+void GyroManager::logData(std::chrono::time_point<std::chrono::system_clock> time) {
+  long long timeLog = std::chrono::duration_cast<std::chrono::nanoseconds>
+      (time - TimeManager::getStartTime()).count();
+  BOOST_LOG(m_logger) << logging::add_value("DataTimeStamp", timeLog) <<
+                      getGyroX() << "," << getGyroY() << "," << getGyroZ() << "," <<
+                      getGyroXRaw() << "," << getGyroYRaw() << "," << getGyroZRaw() << "," <<
+                      getAccelXRaw() << "," << getAccelYRaw() << "," << getAccelZRaw() << "," <<
+                      getTempRaw() << "," << getTemp();
+}
+
 void GyroManager::update() {
   bool run = true;
   auto startTime = std::chrono::system_clock::now();
+  std::unique_lock<std::mutex> lock(threadMutex);
   while (run) {
-    std::unique_lock<std::mutex> lock(threadMutex);
     threadCond.wait_for(lock, std::chrono::milliseconds(1/SAMPLE_RATE));
     if (threadInterrupt) {
       run = false;
@@ -96,6 +122,7 @@ void GyroManager::update() {
     gyroX.fetch_add(gyroXRaw * dtSeconds);
     gyroY.fetch_add(gyroYRaw * dtSeconds);
     gyroZ.fetch_add(gyroZRaw * dtSeconds);
+    logData(endTime);
   }
 }
 

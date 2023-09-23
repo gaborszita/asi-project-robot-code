@@ -4,8 +4,10 @@
 #include <thread>
 #include <mutex>
 #include <condition_variable>
+#include <boost/log/sources/channel_logger.hpp>
 
 namespace RobotCode::DeviceManagers {
+
 
 class ReflectanceSensorManager {
  public:
@@ -33,6 +35,8 @@ class ReflectanceSensorManager {
   std::mutex threadMutex;
   std::condition_variable threadCond;
   std::atomic_char sensorValues = 0;
+
+  boost::log::sources::channel_logger<> m_logger;
 };
 
 }

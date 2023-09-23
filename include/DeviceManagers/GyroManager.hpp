@@ -5,11 +5,13 @@
 #include <mutex>
 #include <condition_variable>
 #include <atomic>
+#include <boost/log/sources/channel_logger.hpp>
 
 namespace RobotCode::DeviceManagers {
 
 class GyroManager {
  public:
+  GyroManager();
   ~GyroManager();
   void initialize();
   void startUpdateThread();
@@ -34,8 +36,9 @@ class GyroManager {
   [[nodiscard]] short readRawData(int highRegister, int lowRegister) const;
   void update();
   void ensureInitialized() const;
+  void logData(std::chrono::time_point<std::chrono::system_clock> time);
 
-  int fd;
+  int fd{};
 
   static const int MPU6050_ADDRESS = 0x68;
   static const int PWR_MGMT_1_REGISTER = 0x6B;
@@ -78,6 +81,8 @@ class GyroManager {
   std::condition_variable threadCond;
 
   bool initialized = false;
+
+  boost::log::sources::channel_logger<> m_logger;
 };
 
 }

@@ -3,15 +3,30 @@
 #include <wiringPi.h>
 #include <iostream>
 #include <thread>
+#include <boost/log/sources/record_ostream.hpp>
+#include <boost/log/utility/manipulators/add_value.hpp>
+#include <bitset>
+#include <boost/log/attributes/constant.hpp>
+#include <boost/log/keywords/channel.hpp>
+#include "Utilities/TimeManager.hpp"
+
+namespace logging = boost::log;
+namespace keywords = boost::log::keywords;
+namespace attrs = boost::log::attributes;
+
+using namespace RobotCode::Utilities;
 
 namespace RobotCode::DeviceManagers {
 
-ReflectanceSensorManager::ReflectanceSensorManager(std::chrono::microseconds decayTime) : decayTime(decayTime) {
+ReflectanceSensorManager::ReflectanceSensorManager(std::chrono::microseconds decayTime) :
+  decayTime(decayTime),
+  m_logger(keywords::channel = "device") {
+    m_logger.add_attribute("Device", attrs::constant<std::string>("ReflectanceSensor"));
 }
 
 void ReflectanceSensorManager::initialize() {
   if (initialized) {
-    throw std::logic_error("GyroManager already initialized.");
+    throw std::logic_error("ReflectanceSensorManager already initialized.");
   }
   wiringPiSetupGpio();
   pinMode(LED_ON_GPIO, OUTPUT);
@@ -84,13 +99,19 @@ char ReflectanceSensorManager::readSenors() {
 
 void ReflectanceSensorManager::update() {
   bool run = true;
+  std::unique_lock<std::mutex> lock(threadMutex);
   while (run) {
-    std::unique_lock<std::mutex> lock(threadMutex);
     threadCond.wait_for(lock, std::chrono::milliseconds(10));
     if (threadInterrupt) {
       run = false;
     }
     sensorValues = readSenors();
+    auto timeNow = std::chrono::system_clock::now();
+    long long timeLog = std::chrono::duration_cast<std::chrono::nanoseconds>
+        (timeNow - TimeManager::getStartTime()).count();
+    BOOST_LOG(m_logger) << logging::add_value("DataTimeStamp",
+                                              timeLog)
+                        << std::bitset<8>(sensorValues);
   }
 }
 

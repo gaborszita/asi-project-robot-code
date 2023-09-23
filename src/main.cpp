@@ -2,6 +2,11 @@
 #include <unistd.h>
 #include <chrono>
 #include <thread>
+#include <boost/log/trivial.hpp>
+#include <boost/log/utility/setup/file.hpp>
+#include <boost/log/utility/setup/common_attributes.hpp>
+#include <iostream>
+#include <fstream>
 
 #include "rplidar.h"
 #include "Adafruit_MotorHAT.h"
@@ -10,14 +15,20 @@
 #include "DeviceManagers/MouseManager.hpp"
 #include "DeviceManagers/ReflectanceSensorManager.hpp"
 #include "DeviceManagers/DriveMotorManager.hpp"
+#include "logging/LoggingController.hpp"
 #include <bitset>
+#include "RobotControl/DeviceManager.hpp"
+#include "Utilities/TimeManager.hpp"
 
 #include "Utilities/PID.hpp"
 
 Adafruit_MotorHAT hat;
 
 using namespace RobotCode::DeviceManagers;
+using namespace RobotCode::Logging;
 
+namespace logging = boost::log;
+namespace keywords = boost::log::keywords;
 
 int main() {
   std::cout << "Hello, World!" << std::endl;
@@ -43,15 +54,16 @@ int main() {
   }
   lm.quickStop();*/
 
+  LoggingController::init();
   /*GyroManager gm;
   gm.quickStart();
   double gyroxsum, gyroysum, gyrozsum, accelxsum, accelysum, accelzsum;
-  for(int i=0; i<6; i++) {
-    std::cout << "gyro x: " << gm.getGyroX() << std::endl;
-    std::cout << "gyro y: " << gm.getGyroY() << std::endl;
-    std::cout << "gyro z: " << gm.getGyroZ() << std::endl;
+  //while (true) {
+    //std::cout << "gyro x: " << gm.getGyroX() << std::endl;
+    //std::cout << "gyro y: " << gm.getGyroY() << std::endl;
+    //std::cout << "gyro z: " << gm.getGyroZ() << std::endl;
     sleep(1);
-  }
+  //}
   gm.quickStop();*/
 
   /*MouseManager mg;
@@ -87,8 +99,9 @@ int main() {
     i++;
   }*/
 
-  ReflectanceSensorManager rsm(std::chrono::microseconds(100));
+  /*ReflectanceSensorManager rsm(std::chrono::microseconds(100));
   rsm.quickStart();
+  rsm.quickStop();*/
 
   /*while (1) {
     //sleep(1);
@@ -96,7 +109,7 @@ int main() {
     std::cout << std::bitset<8>(val) << std::endl;
   }*/
 
-  DriveMotorManager dgm;
+  /*DriveMotorManager dgm;
   dgm.runMotor(DriveMotorManager::BackRight, DriveMotorManager::Forward, 100);
   sleep(2);
   dgm.releaseMotor(DriveMotorManager::BackRight);
@@ -108,7 +121,52 @@ int main() {
   dgm.releaseMotor(DriveMotorManager::FrontLeft);
   dgm.runMotor(DriveMotorManager::FrontRight, DriveMotorManager::Forward, 100);
   sleep(2);
-  dgm.releaseMotor(DriveMotorManager::FrontRight);
+  dgm.releaseMotor(DriveMotorManager::FrontRight);*/
+
+
+
+    //std::ofstream out("/home/pi/sampletestcreate.log");
+    //out << "Hello, World!";
+    //out.close();
+
+
+
+
+  //boost::log::add_file_log(boost::log::keywords::target = "/home/pi",
+  //                         boost::log::keywords::file_name = "%y%m%d_%3N.log");
+  // wait for 10 seconds
+  //std::this_thread::sleep_for(std::chrono::seconds(10));
+
+  /*boost::log::core::get()->set_filter
+      (
+          boost::log::trivial::severity >= boost::log::trivial::info
+      );
+
+  boost::log::add_common_attributes();
+
+  BOOST_LOG_TRIVIAL(info) << "Hello, World!";
+  BOOST_LOG_TRIVIAL(fatal) << "Hello, World!";*/
+
+
+  /*GyroManager gm;
+  ReflectanceSensorManager rsm(std::chrono::microseconds(100));
+  MouseManager mm;
+  DriveMotorManager dmm;
+  gm.quickStart();
+  rsm.quickStart();
+  mm.quickStart();
+  sleep(1);
+  dmm.runMotor(DriveMotorManager::FrontLeft, DriveMotorManager::Forward, 100);
+  sleep(1);
+  gm.quickStop();
+  rsm.quickStop();
+  dmm.releaseMotor(DriveMotorManager::FrontLeft);*/
+
+  RobotCode::Utilities::TimeManager::resetStartTime();
+  RobotCode::RobotControl::DeviceManager dm;
+  dm.startup();
+  sleep(5);
+  dm.shutdown();
 
   return 0;
 }

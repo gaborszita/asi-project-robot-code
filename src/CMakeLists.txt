@@ -9,6 +9,11 @@ add_executable(
   DeviceManagers/ReflectanceSensorManager.cpp
   DeviceManagers/DriveMotorManager.cpp
   Utilities/PID.cpp
+  Utilities/TimeManager.cpp
+  logging/LoggingController.cpp
+  logging/LidarLogManager.cpp
+  RobotControl/DeviceManager.cpp
+  RobotControl/DriveTrain.cpp
 )
 target_include_directories(robot_code PRIVATE ../include)
 
@@ -44,3 +49,12 @@ target_link_directories(robot_code PRIVATE ${BINARY_DIR}/sdk/output/${CMAKE_SYST
 target_link_libraries(robot_code PRIVATE rplidar_sdk)
 target_link_libraries(robot_code PRIVATE pthread) # RPLIDAR SDK needs pthread
 add_dependencies(robot_code rplidar_sdk_proj)
+
+find_package(
+  Boost
+  REQUIRED
+  COMPONENTS log
+)
+
+target_include_directories(robot_code PRIVATE ${Boost_INCLUDE_DIRS})
+target_link_libraries(robot_code PRIVATE Boost::log)
