@@ -3,7 +3,7 @@
 namespace RobotCode::RobotControl {
 
 DeviceManager::DeviceManager() :
-    reflectanceSensorManager(std::chrono::milliseconds(100)) {
+    reflectanceSensorManager(std::chrono::microseconds(100)) {
 }
 
 RobotCode::DeviceManagers::MouseManager &DeviceManager::getMouseManager() {
