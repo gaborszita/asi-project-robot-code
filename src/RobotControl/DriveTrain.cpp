@@ -23,27 +23,27 @@ void DriveTrain::drive(RobotCode::RobotControl::DriveTrain::Direction direction,
                        RobotCode::RobotControl::DriveTrain::Speed speed) {
   char realSpeed;
   if (speed == Slow) {
-    realSpeed = 85;
+    realSpeed = 80;
   } else if (speed == Medium) {
-    realSpeed = 140;
+    realSpeed = 105;
   } else {
-    realSpeed = 200;
+    realSpeed = 140;
   }
   logData(direction, realSpeed, std::chrono::system_clock::now());
   switch (direction) {
     case Forward:
       motorManager.runMotor(DeviceManagers::DriveMotorManager::FrontLeft,
                             DeviceManagers::DriveMotorManager::Forward,
-                            realSpeed);
+                            realSpeed-10);
       motorManager.runMotor(DeviceManagers::DriveMotorManager::FrontRight,
                             DeviceManagers::DriveMotorManager::Forward,
-                            realSpeed);
+                            realSpeed-10);
       motorManager.runMotor(DeviceManagers::DriveMotorManager::BackLeft,
                             DeviceManagers::DriveMotorManager::Forward,
-                            realSpeed);
+                            realSpeed-10);
       motorManager.runMotor(DeviceManagers::DriveMotorManager::BackRight,
                             DeviceManagers::DriveMotorManager::Forward,
-                            realSpeed);
+                            realSpeed-10);
       break;
     case Backward:
       motorManager.runMotor(DeviceManagers::DriveMotorManager::FrontLeft,
@@ -62,13 +62,13 @@ void DriveTrain::drive(RobotCode::RobotControl::DriveTrain::Direction direction,
     case TurnLeft:
       motorManager.runMotor(DeviceManagers::DriveMotorManager::FrontLeft,
                             DeviceManagers::DriveMotorManager::Forward,
-                            realSpeed / 2);
+                            0);
       motorManager.runMotor(DeviceManagers::DriveMotorManager::FrontRight,
                             DeviceManagers::DriveMotorManager::Forward,
                             realSpeed);
       motorManager.runMotor(DeviceManagers::DriveMotorManager::BackLeft,
                             DeviceManagers::DriveMotorManager::Forward,
-                            realSpeed / 2);
+                            0);
       motorManager.runMotor(DeviceManagers::DriveMotorManager::BackRight,
                             DeviceManagers::DriveMotorManager::Forward,
                             realSpeed);
@@ -79,13 +79,13 @@ void DriveTrain::drive(RobotCode::RobotControl::DriveTrain::Direction direction,
                             realSpeed);
       motorManager.runMotor(DeviceManagers::DriveMotorManager::FrontRight,
                             DeviceManagers::DriveMotorManager::Forward,
-                            realSpeed / 2);
+                            0);
       motorManager.runMotor(DeviceManagers::DriveMotorManager::BackLeft,
                             DeviceManagers::DriveMotorManager::Forward,
                             realSpeed);
       motorManager.runMotor(DeviceManagers::DriveMotorManager::BackRight,
                             DeviceManagers::DriveMotorManager::Forward,
-                            realSpeed / 2);
+                            0);
       break;
     case RotateLeft:
       motorManager.runMotor(DeviceManagers::DriveMotorManager::FrontLeft,
@@ -115,6 +115,33 @@ void DriveTrain::drive(RobotCode::RobotControl::DriveTrain::Direction direction,
                             DeviceManagers::DriveMotorManager::Backward,
                             realSpeed);
       break;
+    case BackTurnLeft:
+        motorManager.runMotor(DeviceManagers::DriveMotorManager::FrontLeft,
+                                DeviceManagers::DriveMotorManager::Backward,
+                                realSpeed);
+        motorManager.runMotor(DeviceManagers::DriveMotorManager::FrontRight,
+                                DeviceManagers::DriveMotorManager::Backward,
+                                0);
+        motorManager.runMotor(DeviceManagers::DriveMotorManager::BackLeft,
+                                DeviceManagers::DriveMotorManager::Backward,
+                                realSpeed);
+        motorManager.runMotor(DeviceManagers::DriveMotorManager::BackRight,
+                                DeviceManagers::DriveMotorManager::Backward,
+                                0);
+        break;
+    case BackTurnRight:
+      motorManager.runMotor(DeviceManagers::DriveMotorManager::FrontLeft,
+                            DeviceManagers::DriveMotorManager::Backward,
+                            0);
+      motorManager.runMotor(DeviceManagers::DriveMotorManager::FrontRight,
+                            DeviceManagers::DriveMotorManager::Backward,
+                            realSpeed);
+      motorManager.runMotor(DeviceManagers::DriveMotorManager::BackLeft,
+                            DeviceManagers::DriveMotorManager::Backward,
+                            0);
+      motorManager.runMotor(DeviceManagers::DriveMotorManager::BackRight,
+                            DeviceManagers::DriveMotorManager::Backward,
+                            realSpeed);
   }
 }
 

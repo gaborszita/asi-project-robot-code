@@ -21,6 +21,7 @@
 #include "Utilities/TimeManager.hpp"
 
 #include "Utilities/PID.hpp"
+#include "RobotControl/LineFollower.hpp"
 
 Adafruit_MotorHAT hat;
 
@@ -165,7 +166,11 @@ int main() {
   RobotCode::Utilities::TimeManager::resetStartTime();
   RobotCode::RobotControl::DeviceManager dm;
   dm.startup();
-  sleep(5);
+  RobotCode::RobotControl::LineFollower lf(dm.getReflectanceSensorManager(), dm.getDriveTrain());
+  lf.followLine();
+  //dm.getDriveTrain().drive(RobotCode::RobotControl::DriveTrain::Direction::TurnLeft, RobotCode::RobotControl::DriveTrain::Speed::Fast);
+  //sleep(70);
+  //dm.getDriveTrain().stop();
   dm.shutdown();
 
   return 0;

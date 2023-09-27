@@ -14,6 +14,7 @@ add_executable(
   logging/LidarLogManager.cpp
   RobotControl/DeviceManager.cpp
   RobotControl/DriveTrain.cpp
+  RobotControl/LineFollower.cpp
 )
 target_include_directories(robot_code PRIVATE ../include)
 

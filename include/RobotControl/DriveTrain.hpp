@@ -15,7 +15,9 @@ class DriveTrain {
     TurnLeft,
     TurnRight,
     RotateLeft,
-    RotateRight
+    RotateRight,
+    BackTurnLeft,
+    BackTurnRight
   };
   enum Speed {
     Slow,
