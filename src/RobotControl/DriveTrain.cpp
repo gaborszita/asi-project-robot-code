@@ -23,7 +23,7 @@ void DriveTrain::drive(RobotCode::RobotControl::DriveTrain::Direction direction,
                        RobotCode::RobotControl::DriveTrain::Speed speed) {
   char realSpeed;
   if (speed == Slow) {
-    realSpeed = 80;
+    realSpeed = 100;
   } else if (speed == Medium) {
     realSpeed = 105;
   } else {

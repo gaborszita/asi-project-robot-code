@@ -14,6 +14,8 @@ void LineFollower::followLine() {
   int invalidDataIter = 0;
   int lastDir = 0;
   int remainingWaitBacking = 0;
+  int remainingWaitIntersection = 0;
+  bool intersectionStart = false;
   while(true) {
     /*
      * 00000000 -> stop, ERROR
@@ -25,14 +27,15 @@ xxx10000 -> turn right
 Everything else -> invalid data error
      */
 
-    char data = rsm.getSensorValues();
+    char data = rsm.getSensorValues() & 0x7F;
     //while (true) {
     //  char data = rsm.getSensorValues();
     //  std::cout << std::bitset<8>(data) << std::endl;
     //}
     std::cout << std::bitset<8>(data) << std::endl;
+    //continue;
 
-    if (data == 0x00) {
+    if (data == 0x00 && !intersectionStart) {
       if (lastDir == 0) {
         std::cout << "ERROR: No line on reflectance sensor" << std::endl;
         driveTrain.stop();
@@ -47,17 +50,23 @@ Everything else -> invalid data error
       remainingWaitBacking = 10;
       //invalidDataIter = 0;
       //std::cout << "ERROR: No line on reflectance sensor" << std::endl;
-    } else if (data == 0xFF && remainingWaitBacking == 0) {
+    } else if (data == 0x7F && remainingWaitBacking == 0) {
       invalidDataIter = 0;
       std::cout << "End" << std::endl;
       driveTrain.stop();
       return;
-    } else if ((data & 0x18) == 0x18) {
+    } else if ((data & 0x18) == 0x18 || ((data & 0x18) != 0x00 && (data & 0x03) != 0x00 && (data & 0x0F) != 0x0F)
+        || (intersectionStart && data == 0x00) || remainingWaitIntersection > 0) {
+      if (intersectionStart && (data & 0x18) == 0x18) {
+        intersectionStart = false;
+      }
       invalidDataIter = 0;
       remainingWaitBacking > 0 ? remainingWaitBacking-- : remainingWaitBacking = 0;
+      remainingWaitIntersection > 0 ? remainingWaitIntersection-- : remainingWaitIntersection = 0;
       std::cout << "Center, continue straight" << std::endl;
       driveTrain.drive(DriveTrain::Direction::Forward, DriveTrain::Speed::Slow);
     } else if ((data & 0x0F) != 0x00 && (data & 0xF0) == 0x00) {
+      intersectionStart = false;
       invalidDataIter = 0;
       remainingWaitBacking > 0 ? remainingWaitBacking-- : remainingWaitBacking = 0;
       if ((data & 0x0F) > 0x03) {
@@ -69,6 +78,7 @@ Everything else -> invalid data error
       }
       lastDir = 1;
     } else if ((data & 0x0F) == 0x00 && (data & 0xF0) != 0x00) {
+      intersectionStart = false;
       invalidDataIter = 0;
       remainingWaitBacking > 0 ? remainingWaitBacking-- : remainingWaitBacking = 0;
       if ((data & 0xF0) > 0x30) {
@@ -81,21 +91,28 @@ Everything else -> invalid data error
       lastDir = 2;
       //std::cout << "Turn right" << std::endl;
       //driveTrain.drive(DriveTrain::Direction::TurnRight, DriveTrain::Speed::Slow);
-    }  else {
-      lastDir = 0;
-      // stpop, then iterate five times waiting 100 ms between each to give a chance for a good data
-      // if still invalid, then error
-      if (invalidDataIter < 5) {
-        std::cout << "Invalid data from reflectance sensor " << std::bitset<8>(data) << std::endl;
-        driveTrain.stop();
-        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-        invalidDataIter++;
-      } else {
-        std::cout << "ERROR: Invalid data from reflectance sensor " << std::bitset<8>(data) << std::endl;
-        driveTrain.stop();
-        return;
-      }
+    } else if ((data & 0x0F) != 0x00 && (data & 0xF0) != 0x00 && (data & 0x18) == 0) {
+      std::cout << "INTERSECTIONSTART" << std::endl;
+      intersectionStart = true;
+      remainingWaitIntersection = 5;
+    } else {
+      intersectionStart = false;
+        //lastDir = 0;
+        // stpop, then iterate five times waiting 100 ms between each to give a chance for a good data
+        // if still invalid, then error
+        if (invalidDataIter < 5) {
+          std::cout << "Invalid data from reflectance sensor " << std::bitset<8>(data) << std::endl;
+          driveTrain.stop();
+          std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+          invalidDataIter++;
+        } else {
+          std::cout << "ERROR: Invalid data from reflectance sensor " << std::bitset<8>(data) << std::endl;
+          driveTrain.stop();
+          return;
+        }
+
     }
+
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
   }
 }
