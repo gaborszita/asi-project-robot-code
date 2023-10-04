@@ -67,12 +67,16 @@ void MouseManager::update() {
       break;
     }
 
+    float xMetersMov;
+    float yMetersMov;
+
     if (mouseDevice) {
       auto xRead = static_cast<signed char>(data[1]);
       auto yRead = static_cast<signed char>(data[2]);
-      std::atomic<long> xff{};
-      x.fetch_add((float) xRead / MOUSE_DOTS_PER_METER);
-      y.fetch_add((float) yRead / MOUSE_DOTS_PER_METER);
+      xMetersMov = (float) xRead / MOUSE_DOTS_PER_METER;
+      yMetersMov = (float) yRead / MOUSE_DOTS_PER_METER;
+      x.fetch_add(xMetersMov);
+      y.fetch_add(yMetersMov);
     }
 
     auto timeNow = std::chrono::system_clock::now();
@@ -80,7 +84,7 @@ void MouseManager::update() {
         (timeNow - TimeManager::getStartTime()).count();
     BOOST_LOG(m_logger) << logging::add_value("DataTimeStamp",
                                               timeLog)
-                        << x << "," << y;
+                        << x << "," << y << "," << xMetersMov << "," << yMetersMov;
   }
 }
 
