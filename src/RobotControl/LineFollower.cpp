@@ -1,11 +1,11 @@
 #include "RobotControl/LineFollower.hpp"
 #include <iostream>
 #include <bitset>
-#include "RobotControl/LineFollowerFSM.hpp"
 #include <boost/log/attributes.hpp>
 #include <boost/log/sources/record_ostream.hpp>
 #include <boost/log/utility/manipulators.hpp>
 #include <boost/log/keywords/channel.hpp>
+#include <boost/log/trivial.hpp>
 #include "Utilities/TimeManager.hpp"
 
 namespace logging = boost::log;
@@ -21,12 +21,12 @@ LineFollower::LineFollower(RobotCode::DeviceManagers::ReflectanceSensorManager &
     rsm(rsm),
     driveTrain(driveTrain),
     m_logger(keywords::channel = "device") {
-m_logger.add_attribute("Device", attrs::constant<std::string>("LineFollower"));
+  m_logger.add_attribute("Device", attrs::constant<std::string>("LineFollower"));
 }
 
 void LineFollower::followLine() {
   StateManager::getIntersectionState().setPath(6, 3);
-  State* currentState = &StateManager::getStartState();
+  State *currentState = &StateManager::getStartState();
   while (!currentState->isEnd()) {
     char data = rsm.getSensorValues() & 0x7E;
 
@@ -43,7 +43,7 @@ void LineFollower::followLine() {
   long long timeLog = std::chrono::duration_cast<std::chrono::nanoseconds>
       (time - TimeManager::getStartTime()).count();
   BOOST_LOG(m_logger) << logging::add_value("DataTimeStamp", timeLog)
-                      << "End" << currentState->isEndNormal() << "," << currentState->endStatus();
+                      << "End" << "," << currentState->isEndNormal() << "," << currentState->endStatus();
 }
 
 }

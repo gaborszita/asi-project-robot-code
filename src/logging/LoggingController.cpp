@@ -24,22 +24,19 @@ void LoggingController::init() {
   logging::add_common_attributes();
 
   // Log non-sensor data to console
-  boost::shared_ptr<sinks::text_ostream_backend> console_log_backend =
-      boost::make_shared<sinks::text_ostream_backend>(
-          keywords::filter = expr::attr<std::string>("Channel") != "device"
-      );
+  /*boost::shared_ptr<sinks::text_ostream_backend> console_log_backend =
+      boost::make_shared<sinks::text_ostream_backend>();
 
   typedef sinks::synchronous_sink<sinks::text_ostream_backend> sync_console_log;
   boost::shared_ptr<sync_console_log> console_sink(new sync_console_log(console_log_backend));
-  core->add_sink(console_sink);
+  console_sink->set_filter(expr::attr<std::string>("Channel") != "device");
+  core->add_sink(console_sink);*/
 
   // Log sensor data to file
   boost::shared_ptr<sinks::text_file_backend> sensor_log_backend =
       boost::make_shared<sinks::text_file_backend>(
-
           keywords::target = "/home/pi",
-          keywords::file_name = "/home/pi/%y_%m_%d.log",
-          keywords::filter = expr::attr<std::string>("Channel") == "device"
+          keywords::file_name = "/home/pi/%y_%m_%d_%H_%M_%S.log"
       );
 
   typedef sinks::asynchronous_sink<sinks::text_file_backend> async_file_log;
@@ -48,6 +45,7 @@ void LoggingController::init() {
                                % expr::attr<long long>("DataTimeStamp")
                                % expr::attr<std::string>("Device")
                                % expr::smessage);
+  file_sink->set_filter(expr::attr<std::string>("Channel") == "device");
   core->add_sink(file_sink);
 }
 

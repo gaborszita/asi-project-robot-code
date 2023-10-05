@@ -10,7 +10,7 @@ namespace RobotCode::RobotControl {
 
 class LineFollower {
  public:
-  LineFollower(RobotCode::DeviceManagers::ReflectanceSensorManager& rsm, DriveTrain& driveTrain);
+  LineFollower(RobotCode::DeviceManagers::ReflectanceSensorManager &rsm, DriveTrain &driveTrain);
   void followLine();
  private:
   RobotCode::DeviceManagers::ReflectanceSensorManager &rsm;
