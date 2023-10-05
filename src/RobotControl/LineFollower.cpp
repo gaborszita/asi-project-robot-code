@@ -2,106 +2,48 @@
 #include <iostream>
 #include <bitset>
 #include "RobotControl/LineFollowerFSM.hpp"
+#include <boost/log/attributes.hpp>
+#include <boost/log/sources/record_ostream.hpp>
+#include <boost/log/utility/manipulators.hpp>
+#include <boost/log/keywords/channel.hpp>
+#include "Utilities/TimeManager.hpp"
+
+namespace logging = boost::log;
+namespace attrs = boost::log::attributes;
+namespace keywords = boost::log::keywords;
 
 using namespace RobotCode::RobotControl::LineFollowerFSM;
+using namespace RobotCode::Utilities;
 
 namespace RobotCode::RobotControl {
 
 LineFollower::LineFollower(RobotCode::DeviceManagers::ReflectanceSensorManager &rsm, DriveTrain &driveTrain) :
     rsm(rsm),
-    driveTrain(driveTrain) {
-
+    driveTrain(driveTrain),
+    m_logger(keywords::channel = "device") {
+m_logger.add_attribute("Device", attrs::constant<std::string>("LineFollower"));
 }
 
 void LineFollower::followLine() {
-  currentState = Center;
-  while(true) {
-    char data = rsm.getSensorValues() & 0x7F;
+  StateManager::getIntersectionState().setPath(6, 3);
+  State* currentState = &StateManager::getStartState();
+  while (!currentState->isEnd()) {
+    char data = rsm.getSensorValues() & 0x7E;
 
-    switch (currentState) {
-      case Center:
-        currentState = centerState.getNextState(data);
-        break;
-        case TurnLeft:
-        currentState = turnLeftState.getNextState(data);
-        break;
-        case RotateLeft:
-        currentState = rotateLeftState.getNextState(data);
-        break;
-        case TurnRight:
-        currentState = turnRightState.getNextState(data);
-        break;
-        case RotateRight:
-        currentState = rotateRightState.getNextState(data);
-        break;
-        case TurnLeftLost:
-        currentState = turnLeftLostState.getNextState(data);
-        break;
-        case TurnRightLost:
-        currentState = turnRightLostState.getNextState(data);
-        break;
-        case Intersection:
-        currentState = intersectionState.getNextState(data);
-        break;
-      case Backward:
-        currentState = centerState.getNextState(data);
-        break;
-      case Error:
-        currentState = errorState.getNextState(data);
-        break;
+    //std::cout << std::bitset<8>(data) << std::endl;
+
+    currentState = &currentState->getNextState(data);
+    currentState->runMotors(driveTrain);
+
+    if (!currentState->isEnd()) {
+      std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
-
-    if (currentState == Error) {
-      std::cout << "Error" << std::endl;
-      //break;
-    }
-
-    // run motors based on current state
-    switch (currentState) {
-      case Center:
-        std::cout << "Center" << std::endl;
-        centerState.runMotors(driveTrain);
-        break;
-        case TurnLeft:
-          std::cout << "TurnLeft" << std::endl;
-        turnLeftState.runMotors(driveTrain);
-        break;
-        case RotateLeft:
-          std::cout << "RotateLeft" << std::endl;
-        rotateLeftState.runMotors(driveTrain);
-        break;
-        case TurnRight:
-          std::cout << "TurnRight" << std::endl;
-        turnRightState.runMotors(driveTrain);
-        break;
-        case RotateRight:
-          std::cout <<  "RotateRight" << std::endl;
-        rotateRightState.runMotors(driveTrain);
-        break;
-        case TurnLeftLost:
-          std::cout << "TurnLeftLost" << std::endl;
-        turnLeftLostState.runMotors(driveTrain);
-        break;
-        case TurnRightLost:
-          std::cout << "TurnRightLost" << std::endl;
-        turnRightLostState.runMotors(driveTrain);
-        break;
-        case Intersection:
-          std::cout << "Intersection" << std::endl;
-        intersectionState.runMotors(driveTrain);
-        break;
-      case Backward:
-        std::cout << "Backward" << std::endl;
-        backwardState.runMotors(driveTrain);
-        break;
-      case Error:
-        std::cout << "Error" << std::endl;
-        errorState.runMotors(driveTrain);
-        break;
-    }
-
-    std::this_thread::sleep_for(std::chrono::milliseconds(1));
   }
+  auto time = std::chrono::system_clock::now();
+  long long timeLog = std::chrono::duration_cast<std::chrono::nanoseconds>
+      (time - TimeManager::getStartTime()).count();
+  BOOST_LOG(m_logger) << logging::add_value("DataTimeStamp", timeLog)
+                      << "End" << currentState->isEndNormal() << "," << currentState->endStatus();
 }
 
 }

@@ -4,6 +4,7 @@
 #include "DeviceManagers/ReflectanceSensorManager.hpp"
 #include "RobotControl/DriveTrain.hpp"
 #include "LineFollowerFSM.hpp"
+#include <boost/log/sources/channel_logger.hpp>
 
 namespace RobotCode::RobotControl {
 
@@ -14,18 +15,7 @@ class LineFollower {
  private:
   RobotCode::DeviceManagers::ReflectanceSensorManager &rsm;
   DriveTrain &driveTrain;
-
-  LineFollowerFSM::CenterState centerState;
-  LineFollowerFSM::TurnLeftState turnLeftState;
-  LineFollowerFSM::RotateLeftState rotateLeftState;
-  LineFollowerFSM::TurnRightState turnRightState;
-  LineFollowerFSM::RotateRightState rotateRightState;
-  LineFollowerFSM::TurnLeftLostState turnLeftLostState;
-  LineFollowerFSM::TurnRightLostState turnRightLostState;
-  LineFollowerFSM::IntersectionState intersectionState;
-  LineFollowerFSM::BackwardState backwardState;
-  LineFollowerFSM::ErrorState errorState;
-  LineFollowerFSM::States currentState;
+  boost::log::sources::channel_logger<> m_logger;
 };
 
 }
