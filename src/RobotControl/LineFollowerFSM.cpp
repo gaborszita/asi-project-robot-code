@@ -42,27 +42,22 @@ std::string State::endStatus() {
 
 State& State::commonLineChooser(char sensorData) {
   if (sensorData == 0x7E) {
-    std::cout << "intersectionstate" << std::endl;
     return StateManager::getIntersectionState();
   } else if ((sensorData & 0x18) == 0x18) {
-    //std::cout << "centerstate" << std::endl;
     return StateManager::getCenterState();
   } else if ((sensorData & 0x0F) != 0x00 && (sensorData & 0xF0) == 0x00) {
-    //std::cout << "turnleftstate" << std::endl;
     if ((sensorData & 0x0F) > 0x03) {
       return StateManager::getTurnLeftState();
     } else {
       return StateManager::getRotateLeftState();
     }
   } else if ((sensorData & 0x0F) == 0x00 && (sensorData & 0xF0) != 0x00) {
-    //std::cout << "turnrightstate" << std::endl;
     if ((sensorData & 0xF0) > 0x30) {
       return StateManager::getRotateRightState();
     } else {
       return StateManager::getTurnRightState();
     }
   } else {
-    //std::cout << "errorstate" << std::endl;
     return StateManager::getErrorState();
   }
 }
@@ -202,7 +197,6 @@ int countSetBits(int n) {
 }
 
 State& IntersectionState::getNextState(char sensorData) {
-  std::cout << m_intersectionInPathCnt << std::endl;
   if (m_intersectionInPathCnt < m_numIntersectionsInPath) {
     m_intersectionInPathCnt++;
     return StateManager::getInIntersectionState();
@@ -236,12 +230,10 @@ void IntersectionWaitState::runMotors(RobotCode::RobotControl::DriveTrain driveT
 State& IntersectionWaitState::getNextState(char sensorData) {
   auto timeNow = std::chrono::system_clock::now();
   if (timeNow > m_continueTime) {
-    if (m_pathRepCnt < m_pathRep) {
-      if (countSetBits(sensorData) > 2) {
+    if (countSetBits(sensorData) <= 2) {
+      return StateManager::getIntersectionBackupState();
+    } else if (m_pathRepCnt < m_pathRep) {
         return StateManager::getStartState();
-      } else {
-        return StateManager::getIntersectionBackupState();
-      }
     } else {
       return StateManager::getEndState();
     }
@@ -261,8 +253,6 @@ void StartState::runMotors(RobotCode::RobotControl::DriveTrain driveTrain) {
 }
 
 State& StartState::getNextState(char sensorData) {
-  std::cout << "start" << std::endl;
-  std::cout << m_intersectionInPathCnt << std::endl;
   m_pathRepCnt++;
   m_intersectionInPathCnt++;
   if (countSetBits(sensorData) > 2) {
