@@ -237,7 +237,11 @@ State& IntersectionWaitState::getNextState(char sensorData) {
   auto timeNow = std::chrono::system_clock::now();
   if (timeNow > m_continueTime) {
     if (m_pathRepCnt < m_pathRep) {
-      return StateManager::getStartState();
+      if (countSetBits(sensorData) > 2) {
+        return StateManager::getStartState();
+      } else {
+        return StateManager::getIntersectionBackupState();
+      }
     } else {
       return StateManager::getEndState();
     }
@@ -299,6 +303,8 @@ State& IntersectionBackupState::getNextState(char sensorData) {
   if (sensorData != 0x7E) {
     return StateManager::getIntersectionBackupState();
   } else {
+    StateManager::getIntersectionWaitState()
+    .setContinueTime(std::chrono::system_clock::now() + std::chrono::milliseconds(2000));
     return StateManager::getIntersectionWaitState();
   }
 }
