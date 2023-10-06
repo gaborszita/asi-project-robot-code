@@ -26,7 +26,7 @@ void DriveMotorManager::runMotor(RobotCode::DeviceManagers::DriveMotorManager::M
                                  RobotCode::DeviceManagers::DriveMotorManager::MotorDirection direction,
                                  char speed) {
   logData(motor, direction, speed, std::chrono::system_clock::now());
-  BOOST_LOG(m_logger) << motor << "," << direction << "," << speed;
+  //BOOST_LOG(m_logger) << motor << "," << direction << "," << speed;
   switch (motor) {
     case FrontLeft:
       if (direction == Forward) {
@@ -110,7 +110,7 @@ void DriveMotorManager::logData(DriveMotorManager::Motor motor,
       (time - TimeManager::getStartTime()).count();
 
   BOOST_LOG(m_logger) << logging::add_value("DataTimeStamp", timeLog)
-                      << motorString << "," << directionString << "," << speed;
+                      << motorString << "," << directionString << "," << +speed;
 }
 
 }

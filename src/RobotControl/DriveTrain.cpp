@@ -176,7 +176,7 @@ void DriveTrain::logData(RobotCode::RobotControl::DriveTrain::Direction directio
   long long timeLog = std::chrono::duration_cast<std::chrono::nanoseconds>
       (time - TimeManager::getStartTime()).count();
   BOOST_LOG(m_logger) << logging::add_value("DataTimeStamp", timeLog)
-                      << directionString << "," << speed;
+                      << directionString << "," << +speed;
 }
 
 void DriveTrain::logDataStop(std::chrono::time_point<std::chrono::system_clock> time) {
