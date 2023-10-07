@@ -25,19 +25,18 @@ LineFollower::LineFollower(RobotCode::DeviceManagers::ReflectanceSensorManager &
 }
 
 void LineFollower::followLine() {
-  StateManager::getIntersectionState().setPath(6, 3);
+  StateManager::getIntersectionState().setPath(6, 10);
   State *currentState = &StateManager::getStartState();
+  currentState->runMotors(driveTrain);
   while (!currentState->isEnd()) {
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+
     char data = rsm.getSensorValues() & 0x7E;
 
     //std::cout << std::bitset<8>(data) << std::endl;
 
     currentState = &currentState->getNextState(data);
     currentState->runMotors(driveTrain);
-
-    if (!currentState->isEnd()) {
-      std::this_thread::sleep_for(std::chrono::milliseconds(1));
-    }
   }
   auto time = std::chrono::system_clock::now();
   long long timeLog = std::chrono::duration_cast<std::chrono::nanoseconds>
