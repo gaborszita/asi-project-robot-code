@@ -17,7 +17,9 @@ class DriveTrain {
     RotateLeft,
     RotateRight,
     BackTurnLeft,
-    BackTurnRight
+    BackTurnRight,
+    StrideLeft,
+    StrideRight
   };
   enum Speed {
     Slow,

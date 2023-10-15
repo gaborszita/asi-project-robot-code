@@ -142,6 +142,35 @@ void DriveTrain::drive(RobotCode::RobotControl::DriveTrain::Direction direction,
       motorManager.runMotor(DeviceManagers::DriveMotorManager::BackRight,
                             DeviceManagers::DriveMotorManager::Backward,
                             realSpeed);
+      break;
+    case StrideLeft:
+      motorManager.runMotor(DeviceManagers::DriveMotorManager::FrontLeft,
+                            DeviceManagers::DriveMotorManager::Backward,
+                            realSpeed);
+      motorManager.runMotor(DeviceManagers::DriveMotorManager::FrontRight,
+                            DeviceManagers::DriveMotorManager::Forward,
+                            realSpeed);
+      motorManager.runMotor(DeviceManagers::DriveMotorManager::BackLeft,
+                            DeviceManagers::DriveMotorManager::Forward,
+                            realSpeed);
+      motorManager.runMotor(DeviceManagers::DriveMotorManager::BackRight,
+                            DeviceManagers::DriveMotorManager::Backward,
+                            realSpeed);
+      break;
+    case StrideRight:
+      motorManager.runMotor(DeviceManagers::DriveMotorManager::FrontLeft,
+                            DeviceManagers::DriveMotorManager::Forward,
+                            realSpeed);
+      motorManager.runMotor(DeviceManagers::DriveMotorManager::FrontRight,
+                            DeviceManagers::DriveMotorManager::Backward,
+                            realSpeed);
+      motorManager.runMotor(DeviceManagers::DriveMotorManager::BackLeft,
+                            DeviceManagers::DriveMotorManager::Backward,
+                            realSpeed);
+      motorManager.runMotor(DeviceManagers::DriveMotorManager::BackRight,
+                            DeviceManagers::DriveMotorManager::Forward,
+                            realSpeed);
+      break;
   }
 }
 
