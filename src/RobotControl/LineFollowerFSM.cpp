@@ -271,7 +271,7 @@ State &ErrorState::getNextState(char sensorData) {
 }
 
 bool ErrorState::isEnd() {
-  return true;
+  return false;
 }
 
 bool ErrorState::isEndNormal() {
