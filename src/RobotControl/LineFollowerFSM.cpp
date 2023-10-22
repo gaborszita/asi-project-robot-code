@@ -329,7 +329,7 @@ State &StartState::getNextState(char sensorData) {
   m_pathRepCnt++;
   m_intersectionInPathCnt++;
   if (countSetBits(sensorData) > 2) {
-    IntersectionDirection dir = m_path[m_pathRepCnt - 1];
+    IntersectionDirection dir = m_path[m_intersectionInPathCnt - 1];
     if (dir == IntersectionDirection::Straight) {
       return StateManager::getInIntersectionForwardState();
     } else if (dir == IntersectionDirection::Left) {
