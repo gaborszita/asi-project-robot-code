@@ -170,11 +170,12 @@ State &TurnRightLostState::getNextState(char sensorData) {
 void IntersectionState::runMotors(RobotCode::RobotControl::DriveTrain driveTrain) {
   logState("Intersection");
   driveTrain.drive(RobotCode::RobotControl::DriveTrain::Direction::Forward,
-                   RobotCode::RobotControl::DriveTrain::Speed::Fast);
+                   RobotCode::RobotControl::DriveTrain::Speed::Slow);
 }
 
-void IntersectionState::setPath(int numIntersectionsInPath, int pathRep) {
-  m_numIntersectionsInPath = numIntersectionsInPath;
+void IntersectionState::setPath(const std::vector<IntersectionDirection>& path, int pathRep) {
+  m_numIntersectionsInPath = path.size();
+  m_path = path;
   m_pathRep = pathRep;
   m_intersectionInPathCnt = 0;
   m_pathRepCnt = 0;
@@ -198,7 +199,18 @@ int countSetBits(int n) {
 State &IntersectionState::getNextState(char sensorData) {
   if (m_intersectionInPathCnt < m_numIntersectionsInPath) {
     m_intersectionInPathCnt++;
-    return StateManager::getInIntersectionState();
+    IntersectionDirection dir = m_path[m_intersectionInPathCnt-1];
+    if (dir == IntersectionDirection::Straight) {
+      return StateManager::getInIntersectionForwardState();
+    } else if (dir == IntersectionDirection::Left) {
+      StateManager::getInIntersectionLeftState().reset();
+      return StateManager::getInIntersectionLeftState();
+    } else if (dir == IntersectionDirection::Right) {
+      StateManager::getInIntersectionRightState().reset();
+      return StateManager::getInIntersectionRightState();
+    } else {
+      throw std::runtime_error("Invalid direction");
+    }
   } else {
     m_intersectionInPathCnt = 0;
     StateManager::getIntersectionWaitState()
@@ -207,18 +219,79 @@ State &IntersectionState::getNextState(char sensorData) {
   }
 }
 
-void InIntersectionState::runMotors(RobotCode::RobotControl::DriveTrain driveTrain) {
+void InIntersectionForwardState::runMotors(RobotCode::RobotControl::DriveTrain driveTrain) {
   logState("InIntersection");
   driveTrain.drive(RobotCode::RobotControl::DriveTrain::Direction::Forward,
                    RobotCode::RobotControl::DriveTrain::Speed::Fast);
 }
 
-State &InIntersectionState::getNextState(char sensorData) {
+State &InIntersectionForwardState::getNextState(char sensorData) {
   if (countSetBits(sensorData) > 2) {
-    return StateManager::getInIntersectionState();
+    return StateManager::getInIntersectionForwardState();
   } else {
     return commonLineChooser(sensorData);
   }
+}
+
+
+void InIntersectionLeftState::runMotors(RobotCode::RobotControl::DriveTrain driveTrain) {
+  logState("InLeftIntersection");
+  if (!m_reachedOffPath) {
+    driveTrain.drive(RobotCode::RobotControl::DriveTrain::Direction::TurnLeft,
+                     RobotCode::RobotControl::DriveTrain::Speed::Medium);
+  } else {
+    driveTrain.drive(RobotCode::RobotControl::DriveTrain::Direction::RotateLeft,
+                     RobotCode::RobotControl::DriveTrain::Speed::Medium);
+  }
+}
+
+State &InIntersectionLeftState::getNextState(char sensorData) {
+  if (!m_reachedOffPath && countSetBits(sensorData) > 0) {
+    return StateManager::getInIntersectionLeftState();
+  } else if (!m_reachedOffPath && countSetBits(sensorData) == 0) {
+    m_reachedOffPath = true;
+    return StateManager::getInIntersectionLeftState();
+  } else if (m_reachedOffPath && countSetBits(sensorData) == 0) {
+    return StateManager::getInIntersectionLeftState();
+  } else if (m_reachedOffPath && (sensorData & 0x1F) == 0) {
+    return StateManager::getInIntersectionLeftState();
+  } else {
+    return commonLineChooser(sensorData);
+  }
+}
+
+void InIntersectionLeftState::reset() {
+  m_reachedOffPath = false;
+}
+
+void InIntersectionRightState::runMotors(RobotCode::RobotControl::DriveTrain driveTrain) {
+  logState("InLeftIntersection");
+  if (!m_reachedOffPath) {
+    driveTrain.drive(RobotCode::RobotControl::DriveTrain::Direction::TurnRight,
+                     RobotCode::RobotControl::DriveTrain::Speed::Medium);
+  } else {
+    driveTrain.drive(RobotCode::RobotControl::DriveTrain::Direction::RotateRight,
+                     RobotCode::RobotControl::DriveTrain::Speed::Medium);
+  }
+}
+
+State &InIntersectionRightState::getNextState(char sensorData) {
+  if (!m_reachedOffPath && countSetBits(sensorData) > 0) {
+    return StateManager::getInIntersectionRightState();
+  } else if (!m_reachedOffPath && countSetBits(sensorData) == 0) {
+    m_reachedOffPath = true;
+    return StateManager::getInIntersectionRightState();
+  } else if (m_reachedOffPath && countSetBits(sensorData) == 0) {
+    return StateManager::getInIntersectionRightState();
+  } else if (m_reachedOffPath && (sensorData & 0xF8) == 0) {
+    return StateManager::getInIntersectionRightState();
+  } else {
+    return commonLineChooser(sensorData);
+  }
+}
+
+void InIntersectionRightState::reset() {
+  m_reachedOffPath = false;
 }
 
 void IntersectionWaitState::runMotors(RobotCode::RobotControl::DriveTrain driveTrain) {
@@ -247,15 +320,27 @@ void IntersectionWaitState::setContinueTime(std::chrono::time_point<std::chrono:
 
 void StartState::runMotors(RobotCode::RobotControl::DriveTrain driveTrain) {
   logState("Start");
-  driveTrain.drive(RobotCode::RobotControl::DriveTrain::Direction::Forward,
-                   RobotCode::RobotControl::DriveTrain::Speed::Medium);
+  //driveTrain.drive(RobotCode::RobotControl::DriveTrain::Direction::Forward,
+  //                 RobotCode::RobotControl::DriveTrain::Speed::Medium);
+  driveTrain.stop();
 }
 
 State &StartState::getNextState(char sensorData) {
   m_pathRepCnt++;
   m_intersectionInPathCnt++;
   if (countSetBits(sensorData) > 2) {
-    return StateManager::getInIntersectionState();
+    IntersectionDirection dir = m_path[m_pathRepCnt - 1];
+    if (dir == IntersectionDirection::Straight) {
+      return StateManager::getInIntersectionForwardState();
+    } else if (dir == IntersectionDirection::Left) {
+      StateManager::getInIntersectionLeftState().reset();
+      return StateManager::getInIntersectionLeftState();
+    } else if (dir == IntersectionDirection::Right) {
+      StateManager::getInIntersectionRightState().reset();
+      return StateManager::getInIntersectionRightState();
+    } else {
+      throw std::runtime_error("Invalid direction");
+    }
   } else {
     return commonLineChooser(sensorData);
   }
@@ -377,8 +462,16 @@ StartState &StateManager::getStartState() {
   return startState;
 }
 
-InIntersectionState &StateManager::getInIntersectionState() {
-  return inIntersectionState;
+InIntersectionForwardState &StateManager::getInIntersectionForwardState() {
+  return inIntersectionForwardState;
+}
+
+InIntersectionLeftState &StateManager::getInIntersectionLeftState() {
+  return inIntersectionLeftState;
+}
+
+InIntersectionRightState &StateManager::getInIntersectionRightState() {
+  return inIntersectionRightState;
 }
 
 IntersectionWaitState &StateManager::getIntersectionWaitState() {
@@ -401,7 +494,9 @@ RotateRightState StateManager::rotateRightState;
 TurnLeftLostState StateManager::turnLeftLostState;
 TurnRightLostState StateManager::turnRightLostState;
 IntersectionState StateManager::intersectionState;
-InIntersectionState StateManager::inIntersectionState;
+InIntersectionForwardState StateManager::inIntersectionForwardState;
+InIntersectionLeftState StateManager::inIntersectionLeftState;
+InIntersectionRightState StateManager::inIntersectionRightState;
 IntersectionWaitState StateManager::intersectionWaitState;
 BackwardState StateManager::backwardState;
 ErrorState StateManager::errorState;
@@ -409,9 +504,10 @@ StartState StateManager::startState;
 EndState StateManager::endState;
 IntersectionBackupState StateManager::intersectionBackupState;
 
-int State::m_intersectionInPathCnt = 0;
-int State::m_numIntersectionsInPath = 0;
-int State::m_pathRep = 0;
-int State::m_pathRepCnt = 0;
+unsigned int State::m_intersectionInPathCnt = 0;
+unsigned int State::m_numIntersectionsInPath = 0;
+unsigned int State::m_pathRep = 0;
+unsigned int State::m_pathRepCnt = 0;
+std::vector<State::IntersectionDirection> State::m_path;
 
 }

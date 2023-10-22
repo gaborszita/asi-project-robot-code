@@ -17,15 +17,23 @@ class State {
   virtual bool isEndNormal();
   virtual std::string endStatus();
 
+  enum IntersectionDirection {
+    Left,
+    Right,
+    Straight,
+    TurnAround
+  };
+
  protected:
   static State &commonLineChooser(char sensorData);
   boost::log::sources::channel_logger<> m_logger;
   void logState(std::string stateName);
 
-  static int m_numIntersectionsInPath;
-  static int m_pathRep;
-  static int m_intersectionInPathCnt;
-  static int m_pathRepCnt;
+  static unsigned int m_numIntersectionsInPath;
+  static unsigned int m_pathRep;
+  static unsigned int m_intersectionInPathCnt;
+  static unsigned int m_pathRepCnt;
+  static std::vector<IntersectionDirection> m_path;
 };
 
 class StartState : public State {
@@ -81,13 +89,43 @@ class IntersectionState : public State {
   void runMotors(DriveTrain driveTrain) override;
   State &getNextState(char sensorData) override;
 
-  void setPath(int numIntersectionsInPath, int pathRep);
+  void setPath(const std::vector<IntersectionDirection>& path, int pathRep);
 };
 
-class InIntersectionState : public State {
+class InIntersectionForwardState : public State {
  public:
   void runMotors(DriveTrain driveTrain) override;
   State &getNextState(char sensorData) override;
+};
+
+class InIntersectionLeftState : public State {
+ public:
+  void runMotors(DriveTrain driveTrain) override;
+  State &getNextState(char sensorData) override;
+  void reset();
+
+ private:
+  bool m_reachedOffPath = false;
+};
+
+class InIntersectionRightState : public State {
+ public:
+  void runMotors(DriveTrain driveTrain) override;
+  State &getNextState(char sensorData) override;
+  void reset();
+
+ private:
+  bool m_reachedOffPath = false;
+};
+
+class InIntersectionTurnAroundState : public State {
+ public:
+  void runMotors(DriveTrain driveTrain) override;
+  State &getNextState(char sensorData) override;
+  void reset();
+
+ private:
+  bool m_reachedOffPath = false;
 };
 
 class IntersectionWaitState : public State {
@@ -139,7 +177,9 @@ class StateManager {
   static TurnLeftLostState &getTurnLeftLostState();
   static TurnRightLostState &getTurnRightLostState();
   static IntersectionState &getIntersectionState();
-  static InIntersectionState &getInIntersectionState();
+  static InIntersectionForwardState &getInIntersectionForwardState();
+  static InIntersectionLeftState &getInIntersectionLeftState();
+  static InIntersectionRightState &getInIntersectionRightState();
   static IntersectionWaitState &getIntersectionWaitState();
   static BackwardState &getBackwardState();
   static ErrorState &getErrorState();
@@ -156,7 +196,9 @@ class StateManager {
   static TurnLeftLostState turnLeftLostState;
   static TurnRightLostState turnRightLostState;
   static IntersectionState intersectionState;
-  static InIntersectionState inIntersectionState;
+  static InIntersectionForwardState inIntersectionForwardState;
+  static InIntersectionLeftState inIntersectionLeftState;
+  static InIntersectionRightState inIntersectionRightState;
   static BackwardState backwardState;
   static ErrorState errorState;
   static StartState startState;

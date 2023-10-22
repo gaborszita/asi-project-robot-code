@@ -25,9 +25,41 @@ LineFollower::LineFollower(RobotCode::DeviceManagers::ReflectanceSensorManager &
 }
 
 void LineFollower::followLine() {
-  StateManager::getIntersectionState().setPath(6, 10);
+  //driveTrain.drive(DriveTrain::StrideLeft, DriveTrain::Medium);
+  //std::this_thread::sleep_for(std::chrono::milliseconds(3000000));
+  std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+  std::vector<State::IntersectionDirection> path;
+  path.push_back(State::IntersectionDirection::Straight);
+  path.push_back(State::IntersectionDirection::Left);
+  path.push_back(State::IntersectionDirection::Left);
+  path.push_back(State::IntersectionDirection::Left);
+  path.push_back(State::IntersectionDirection::Straight);
+  path.push_back(State::IntersectionDirection::Left);
+  path.push_back(State::IntersectionDirection::Right);
+  path.push_back(State::IntersectionDirection::Right);
+  path.push_back(State::IntersectionDirection::Straight);
+  //path.push_back(State::IntersectionDirection::Right);
+  path.push_back(State::IntersectionDirection::Straight);
+  path.push_back(State::IntersectionDirection::Straight);
+  path.push_back(State::IntersectionDirection::Right);
+  path.push_back(State::IntersectionDirection::Straight);
+  path.push_back(State::IntersectionDirection::Straight);
+  path.push_back(State::IntersectionDirection::Right);
+  path.push_back(State::IntersectionDirection::Right);
+  path.push_back(State::IntersectionDirection::Right);
+  StateManager::getIntersectionState().setPath(path, 1);
   State *currentState = &StateManager::getStartState();
   currentState->runMotors(driveTrain);
+  /*driveTrain.drive(DriveTrain::Forward, DriveTrain::Medium);
+  std::this_thread::sleep_for(std::chrono::milliseconds(2500));
+  driveTrain.drive(DriveTrain::StrideLeft, DriveTrain::Fast);
+  std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+  driveTrain.drive(DriveTrain::Backward, DriveTrain::Medium);
+  std::this_thread::sleep_for(std::chrono::milliseconds(2500));
+  driveTrain.drive(DriveTrain::StrideRight, DriveTrain::Fast);
+  std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+  currentState = &StateManager::getEndState();
+  currentState->runMotors(driveTrain);*/
   while (!currentState->isEnd()) {
     std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
