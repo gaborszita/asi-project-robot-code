@@ -83,6 +83,7 @@ char ReflectanceSensorManager::readSenors() {
   // 3. Allow at least 10 μs for the sensor output to rise
   std::this_thread::sleep_for(std::chrono::microseconds(10));
   // 4. Make the I/O line an input (high impedance)
+  auto startTime = std::chrono::system_clock::now();
   for (int i : SENSOR_GPIO) {
     pinMode(i, INPUT);
   }
@@ -92,9 +93,19 @@ char ReflectanceSensorManager::readSenors() {
   for (int i = 0; i < NUM_SENSORS; i++) {
     read |= (digitalRead(SENSOR_GPIO[i]) << i);
   }
+  auto endTime = std::chrono::system_clock::now();
   // 6. turn off IR LEDs
   digitalWrite(LED_ON_GPIO, LOW);
-  return read;
+  if (endTime - startTime > 1.6 * decayTime) {
+    /*std::cout << "WARNING: Reflectance Sensor decay time " <<
+    std::chrono::duration_cast<std::chrono::microseconds>(endTime - startTime).count()
+    << " μs is greater than decay time limit of "
+    << std::chrono::duration_cast<std::chrono::microseconds>(1.6 * decayTime).count() << " μs. "
+    << "Using last read value." << std::endl;*/
+    return sensorValues;
+  } else {
+    return read;
+  }
 }
 
 void ReflectanceSensorManager::update() {
