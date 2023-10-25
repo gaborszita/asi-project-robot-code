@@ -25,9 +25,9 @@ void DriveTrain::drive(RobotCode::RobotControl::DriveTrain::Direction direction,
   if (speed == Slow) {
     realSpeed = 110;
   } else if (speed == Medium) {
-    realSpeed = 155;
+    realSpeed = 150;
   } else {
-    realSpeed = 200;
+    realSpeed = 160;
   }
   logData(direction, realSpeed, std::chrono::system_clock::now());
   switch (direction) {
