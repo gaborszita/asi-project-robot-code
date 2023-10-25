@@ -15,6 +15,21 @@ using namespace RobotCode::Utilities;
 
 namespace RobotCode::RobotControl::LineFollowerFSM {
 
+int countSetBits(int n) {
+  int count = 0;
+
+  while (n > 0) {
+    // Use bitwise AND to check the least significant bit
+    // If it's 1, increment the count
+    count += n & 1;
+
+    // Right shift the number to check the next bit
+    n >>= 1;
+  }
+
+  return count;
+}
+
 State::State() :
     m_logger(keywords::channel = "device") {
   m_logger.add_attribute("Device", attrs::constant<std::string>("LineFollowerFSM"));
@@ -41,7 +56,7 @@ std::string State::endStatus() {
 }
 
 State &State::commonLineChooser(char sensorData) {
-  if (sensorData == 0x7E) {
+  if (countSetBits(sensorData) > 5) {
     return StateManager::getIntersectionState();
   } else if ((sensorData & 0x18) == 0x18) {
     return StateManager::getCenterState();
@@ -58,7 +73,8 @@ State &State::commonLineChooser(char sensorData) {
       return StateManager::getTurnRightState();
     }
   } else {
-    return StateManager::getErrorState();
+    StateManager::getCorrectErrorState().reset();
+    return StateManager::getCorrectErrorState();
   }
 }
 
@@ -70,8 +86,8 @@ void CenterState::runMotors(RobotCode::RobotControl::DriveTrain driveTrain) {
 
 State &CenterState::getNextState(char sensorData) {
   State &nextState = commonLineChooser(sensorData);
-  if (&nextState == &StateManager::getErrorState()) {
-    return StateManager::getBackwardState();
+  if (&nextState == &StateManager::getCorrectErrorState()) {
+    return StateManager::getCorrectErrorState();
   } else {
     return nextState;
   }
@@ -85,7 +101,7 @@ void TurnLeftState::runMotors(RobotCode::RobotControl::DriveTrain driveTrain) {
 
 State &TurnLeftState::getNextState(char sensorData) {
   State &nextState = commonLineChooser(sensorData);
-  if (&nextState == &StateManager::getErrorState()) {
+  if (&nextState == &StateManager::getCorrectErrorState()) {
     return StateManager::getTurnLeftLostState();
   } else {
     return nextState;
@@ -100,7 +116,7 @@ void RotateLeftState::runMotors(RobotCode::RobotControl::DriveTrain driveTrain) 
 
 State &RotateLeftState::getNextState(char sensorData) {
   State &nextState = commonLineChooser(sensorData);
-  if (&nextState == &StateManager::getErrorState()) {
+  if (&nextState == &StateManager::getCorrectErrorState()) {
     return StateManager::getTurnLeftLostState();
   } else {
     return nextState;
@@ -115,7 +131,7 @@ void TurnRightState::runMotors(RobotCode::RobotControl::DriveTrain driveTrain) {
 
 State &TurnRightState::getNextState(char sensorData) {
   State &nextState = commonLineChooser(sensorData);
-  if (&nextState == &StateManager::getErrorState()) {
+  if (&nextState == &StateManager::getCorrectErrorState()) {
     return StateManager::getTurnRightLostState();
   } else {
     return nextState;
@@ -130,7 +146,7 @@ void RotateRightState::runMotors(RobotCode::RobotControl::DriveTrain driveTrain)
 
 State &RotateRightState::getNextState(char sensorData) {
   State &nextState = commonLineChooser(sensorData);
-  if (&nextState == &StateManager::getErrorState()) {
+  if (&nextState == &StateManager::getCorrectErrorState()) {
     return StateManager::getTurnRightLostState();
   } else {
     return nextState;
@@ -145,7 +161,7 @@ void TurnLeftLostState::runMotors(RobotCode::RobotControl::DriveTrain driveTrain
 
 State &TurnLeftLostState::getNextState(char sensorData) {
   State &nextState = commonLineChooser(sensorData);
-  if (&nextState == &StateManager::getErrorState()) {
+  if (&nextState == &StateManager::getCorrectErrorState()) {
     return StateManager::getTurnLeftLostState();
   } else {
     return nextState;
@@ -160,7 +176,7 @@ void TurnRightLostState::runMotors(RobotCode::RobotControl::DriveTrain driveTrai
 
 State &TurnRightLostState::getNextState(char sensorData) {
   State &nextState = commonLineChooser(sensorData);
-  if (&nextState == &StateManager::getErrorState()) {
+  if (&nextState == &StateManager::getCorrectErrorState()) {
     return StateManager::getTurnRightLostState();
   } else {
     return nextState;
@@ -179,21 +195,6 @@ void IntersectionState::setPath(const std::vector<IntersectionDirection>& path, 
   m_pathRep = pathRep;
   m_intersectionInPathCnt = 0;
   m_pathRepCnt = 0;
-}
-
-int countSetBits(int n) {
-  int count = 0;
-
-  while (n > 0) {
-    // Use bitwise AND to check the least significant bit
-    // If it's 1, increment the count
-    count += n & 1;
-
-    // Right shift the number to check the next bit
-    n >>= 1;
-  }
-
-  return count;
 }
 
 State &IntersectionState::getNextState(char sensorData) {
@@ -328,6 +329,7 @@ void StartState::runMotors(RobotCode::RobotControl::DriveTrain driveTrain) {
 State &StartState::getNextState(char sensorData) {
   m_pathRepCnt++;
   m_intersectionInPathCnt++;
+  std::cout << "Path rep count: " << m_pathRepCnt << std::endl;
   if (countSetBits(sensorData) > 2) {
     IntersectionDirection dir = m_path[m_intersectionInPathCnt - 1];
     if (dir == IntersectionDirection::Straight) {
@@ -346,6 +348,38 @@ State &StartState::getNextState(char sensorData) {
   }
 }
 
+void CorrectErrorState::runMotors(DriveTrain driveTrain) {
+  logState("CorrectError");
+  if (std::chrono::system_clock::now() - m_errorStartTime <= std::chrono::milliseconds(2000) ||
+      std::chrono::system_clock::now() - m_errorStartTime > std::chrono::milliseconds(5000)) {
+    driveTrain.stop();
+  } else if (std::chrono::system_clock::now() - m_errorStartTime <= std::chrono::milliseconds(3000))  {
+    driveTrain.drive(DriveTrain::StrideRight, DriveTrain::Slow);
+  } else if (std::chrono::system_clock::now() - m_errorStartTime <= std::chrono::milliseconds(5000))  {
+    driveTrain.drive(DriveTrain::StrideLeft, DriveTrain::Slow);
+  }
+}
+
+State &CorrectErrorState::getNextState(char sensorData) {
+  m_stateActive = true;
+  if (std::chrono::system_clock::now() - m_errorStartTime <= std::chrono::milliseconds(5000)) {
+    State& nextState = commonLineChooser(sensorData);
+    if (&nextState != this) {
+      m_stateActive = false;
+    }
+    return nextState;
+  } else {
+    m_stateActive = false;
+    return StateManager::getErrorState();
+  }
+}
+
+void CorrectErrorState::reset() {
+  if (!m_stateActive) {
+    m_errorStartTime = std::chrono::system_clock::now();
+  }
+}
+
 void ErrorState::runMotors(DriveTrain driveTrain) {
   logState("Error");
   driveTrain.stop();
@@ -356,7 +390,7 @@ State &ErrorState::getNextState(char sensorData) {
 }
 
 bool ErrorState::isEnd() {
-  return false;
+  return true;
 }
 
 bool ErrorState::isEndNormal() {
@@ -390,7 +424,7 @@ void BackwardState::runMotors(RobotCode::RobotControl::DriveTrain driveTrain) {
 
 State &BackwardState::getNextState(char sensorData) {
   State &nextState = commonLineChooser(sensorData);
-  if (&nextState == &StateManager::getErrorState()) {
+  if (&nextState == &StateManager::getCorrectErrorState()) {
     return StateManager::getBackwardState();
   } else {
     return nextState;
@@ -458,6 +492,10 @@ ErrorState &StateManager::getErrorState() {
   return errorState;
 }
 
+CorrectErrorState &StateManager::getCorrectErrorState() {
+  return correctErrorState;
+}
+
 StartState &StateManager::getStartState() {
   return startState;
 }
@@ -500,6 +538,7 @@ InIntersectionRightState StateManager::inIntersectionRightState;
 IntersectionWaitState StateManager::intersectionWaitState;
 BackwardState StateManager::backwardState;
 ErrorState StateManager::errorState;
+CorrectErrorState StateManager::correctErrorState;
 StartState StateManager::startState;
 EndState StateManager::endState;
 IntersectionBackupState StateManager::intersectionBackupState;

@@ -137,6 +137,17 @@ class IntersectionWaitState : public State {
   std::chrono::time_point<std::chrono::system_clock> m_continueTime;
 };
 
+class CorrectErrorState : public State {
+ public:
+  void runMotors(DriveTrain driveTrain) override;
+  State &getNextState(char sensorData) override;
+  void reset();
+
+ private:
+  std::chrono::time_point<std::chrono::system_clock> m_errorStartTime;
+  bool m_stateActive = false;
+};
+
 class ErrorState : public State {
  public:
   void runMotors(DriveTrain driveTrain) override;
@@ -183,6 +194,7 @@ class StateManager {
   static IntersectionWaitState &getIntersectionWaitState();
   static BackwardState &getBackwardState();
   static ErrorState &getErrorState();
+  static CorrectErrorState &getCorrectErrorState();
   static StartState &getStartState();
   static EndState &getEndState();
   static IntersectionBackupState &getIntersectionBackupState();
@@ -201,6 +213,7 @@ class StateManager {
   static InIntersectionRightState inIntersectionRightState;
   static BackwardState backwardState;
   static ErrorState errorState;
+  static CorrectErrorState correctErrorState;
   static StartState startState;
   static EndState endState;
   static IntersectionWaitState intersectionWaitState;
