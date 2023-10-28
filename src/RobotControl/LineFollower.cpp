@@ -7,6 +7,7 @@
 #include <boost/log/keywords/channel.hpp>
 #include <boost/log/trivial.hpp>
 #include "Utilities/TimeManager.hpp"
+#include "RobotControl/AutoReturnToStart.hpp"
 
 namespace logging = boost::log;
 namespace attrs = boost::log::attributes;
@@ -17,9 +18,14 @@ using namespace RobotCode::Utilities;
 
 namespace RobotCode::RobotControl {
 
-LineFollower::LineFollower(RobotCode::DeviceManagers::ReflectanceSensorManager &rsm, DriveTrain &driveTrain) :
+LineFollower::LineFollower(RobotCode::DeviceManagers::ReflectanceSensorManager &rsm,
+                           DriveTrain &driveTrain,
+                           RobotCode::DeviceManagers::GyroManager& gyroManager,
+                           Logging::LidarLogManager& lidarLogManager) :
     rsm(rsm),
     driveTrain(driveTrain),
+    gyroManager(gyroManager),
+    lidarLogManager(lidarLogManager),
     m_logger(keywords::channel = "device") {
   m_logger.add_attribute("Device", attrs::constant<std::string>("LineFollower"));
 }
@@ -38,7 +44,6 @@ void LineFollower::followLine() {
   path.push_back(State::IntersectionDirection::Left);
   path.push_back(State::IntersectionDirection::Left);
   path.push_back(State::IntersectionDirection::Straight);
-  //path.push_back(State::IntersectionDirection::Right);
   path.push_back(State::IntersectionDirection::Straight);
   path.push_back(State::IntersectionDirection::Straight);
   path.push_back(State::IntersectionDirection::Left);
@@ -47,33 +52,33 @@ void LineFollower::followLine() {
   path.push_back(State::IntersectionDirection::Left);
   path.push_back(State::IntersectionDirection::Left);
   path.push_back(State::IntersectionDirection::Left);
-  /*path.push_back(State::IntersectionDirection::Straight);
-  path.push_back(State::IntersectionDirection::Left);
-  path.push_back(State::IntersectionDirection::Left);
-  path.push_back(State::IntersectionDirection::Left);
-  path.push_back(State::IntersectionDirection::Left);*/
   StateManager::getIntersectionState().setPath(path, 100);
+  AutoReturnToStart as(lidarLogManager, driveTrain, gyroManager, rsm);
+  float lastStartAngle = gyroManager.getGyroZ();
+  as.setTargetRotation(lastStartAngle);
+  if (!as.verifyStart()) {
+    as.returnToStart();
+  }
   State *currentState = &StateManager::getStartState();
   currentState->runMotors(driveTrain);
-  /*driveTrain.drive(DriveTrain::Forward, DriveTrain::Medium);
-  std::this_thread::sleep_for(std::chrono::milliseconds(2500));
-  driveTrain.drive(DriveTrain::StrideLeft, DriveTrain::Fast);
-  std::this_thread::sleep_for(std::chrono::milliseconds(3000));
-  driveTrain.drive(DriveTrain::Backward, DriveTrain::Medium);
-  std::this_thread::sleep_for(std::chrono::milliseconds(2500));
-  driveTrain.drive(DriveTrain::StrideRight, DriveTrain::Fast);
-  std::this_thread::sleep_for(std::chrono::milliseconds(3000));
-  currentState = &StateManager::getEndState();
-  currentState->runMotors(driveTrain);*/
   while (!currentState->isEnd()) {
     std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
     char data = rsm.getSensorValues() & 0x7E;
 
-    //std::cout << std::bitset<8>(data) << std::endl;
-
     currentState = &currentState->getNextState(data);
     currentState->runMotors(driveTrain);
+
+    if (currentState == &StateManager::getStartState() && as.verifyStart()) {
+      lastStartAngle = gyroManager.getGyroZ();
+      as.setTargetRotation(lastStartAngle);
+    }
+
+    if ((currentState->isEnd() && !currentState->isEndNormal()) ||
+        (currentState == &StateManager::getStartState()) && !as.verifyStart()) {
+      as.returnToStart();
+      currentState = &StateManager::getStartState();
+    }
   }
   auto time = std::chrono::system_clock::now();
   long long timeLog = std::chrono::duration_cast<std::chrono::nanoseconds>

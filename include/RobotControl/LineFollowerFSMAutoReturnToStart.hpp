@@ -1,12 +1,9 @@
-#ifndef ROBOT_CODE_ROBOTCONTROL_LINEFOLLOWERFSM_HPP
-#define ROBOT_CODE_ROBOTCONTROL_LINEFOLLOWERFSM_HPP
+#ifndef ROBOT_CODE_ROBOTCONTROL_LINEFOLLOWERFSMAUTORETURNTOSTART_HPP
+#define ROBOT_CODE_ROBOTCONTROL_LINEFOLLOWERFSMAUTORETURNTOSTART_HPP
 
-#include "DriveTrain.hpp"
-#include <boost/log/sources/channel_logger.hpp>
+#include "RobotControl/LineFollowerFSM.hpp"
 
-namespace RobotCode::RobotControl::LineFollowerFSM {
-
-class CenterState;
+namespace RobotCode::RobotControl::LineFollowerFSMAutoReturnToStart {
 
 class State {
  public:
@@ -90,7 +87,6 @@ class IntersectionState : public State {
   State &getNextState(char sensorData) override;
 
   void setPath(const std::vector<IntersectionDirection>& path, int pathRep);
-  void resetIntersectionCnt();
 };
 
 class InIntersectionForwardState : public State {
@@ -223,4 +219,4 @@ class StateManager {
 
 }
 
-#endif //ROBOT_CODE_ROBOTCONTROL_LINEFOLLOWERFSM_HPP
+#endif //ROBOT_CODE_ROBOTCONTROL_LINEFOLLOWERFSMAUTORETURNTOSTART_HPP

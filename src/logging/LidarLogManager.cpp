@@ -44,10 +44,11 @@ void LidarLogManager::quickStop() {
 void LidarLogManager::update() {
   std::unique_lock<std::mutex> lock(threadMutex);
   while (true) {
-    rplidar_response_measurement_node_hq_t nodes[8192];
-    size_t nodeCount = sizeof(nodes)/sizeof(rplidar_response_measurement_node_hq_t);
+    m_nodeCount = sizeof(m_nodes)/sizeof(rplidar_response_measurement_node_hq_t);
     lock.unlock();
-    lidarManager.grabScanData(nodes, nodeCount);
+    std::unique_lock<std::shared_mutex> lock2(lidarDataReadMutex);
+    lidarManager.grabScanData(m_nodes, m_nodeCount);
+    lock2.unlock();
     lock.lock();
     if (threadInterrupt) {
       break;
@@ -55,14 +56,14 @@ void LidarLogManager::update() {
     auto timeNow = std::chrono::system_clock::now();
 
     std::stringstream lidarDataStream;
-    for (int i = 0; i < nodeCount; i++) {
-      float angle_in_degrees = nodes[i].angle_z_q14 * 90.f / (1 << 14);
-      float distance_in_meters = nodes[i].dist_mm_q2 / 1000.f / (1 << 2);
+    for (int i = 0; i < m_nodeCount; i++) {
+      float angle_in_degrees = m_nodes[i].angle_z_q14 * 90.f / (1 << 14);
+      float distance_in_meters = m_nodes[i].dist_mm_q2 / 1000.f / (1 << 2);
       lidarDataStream << distance_in_meters << ","
                       << angle_in_degrees << ","
-                      << unsigned(nodes[i].quality) << ","
-                      << unsigned(nodes[i].flag);
-      if (i != nodeCount - 1) {
+                      << unsigned(m_nodes[i].quality) << ","
+                      << unsigned(m_nodes[i].flag);
+      if (i != m_nodeCount - 1) {
         lidarDataStream << ",";
       }
     }
@@ -71,7 +72,19 @@ void LidarLogManager::update() {
         (timeNow - TimeManager::getStartTime()).count();
     std::string lidarData = lidarDataStream.str();
     BOOST_LOG(m_logger) << logging::add_value("DataTimeStamp", timeLog)
-                        << nodeCount << "," << lidarData;
+                        << m_nodeCount << "," << lidarData;
+  }
+}
+
+void LidarLogManager::getScanData(rplidar_response_measurement_node_hq_t *nodes, size_t &nodeCount) {
+  std::shared_lock<std::shared_mutex> lock(lidarDataReadMutex);
+  nodeCount = m_nodeCount;
+  if (nodeCount < m_nodeCount) {
+    throw std::logic_error("LidarLogManager node count is less than expected.");
+  } else {
+    for (int i = 0; i < m_nodeCount; i++) {
+        nodes[i] = m_nodes[i];
+    }
   }
 }
 

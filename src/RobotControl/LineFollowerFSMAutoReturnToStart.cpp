@@ -1,4 +1,4 @@
-#include "RobotControl/LineFollowerFSM.hpp"
+#include "RobotControl/LineFollowerFSMAutoReturnToStart.hpp"
 #include <boost/log/keywords/channel.hpp>
 #include <boost/log/attributes.hpp>
 #include <boost/log/sources/record_ostream.hpp>
@@ -13,7 +13,7 @@ namespace attrs = boost::log::attributes;
 
 using namespace RobotCode::Utilities;
 
-namespace RobotCode::RobotControl::LineFollowerFSM {
+namespace RobotCode::RobotControl::LineFollowerFSMAutoReturnToStart {
 
 int countSetBits(int n) {
   int count = 0;
@@ -32,7 +32,7 @@ int countSetBits(int n) {
 
 State::State() :
     m_logger(keywords::channel = "device") {
-  m_logger.add_attribute("Device", attrs::constant<std::string>("LineFollowerFSM"));
+  m_logger.add_attribute("Device", attrs::constant<std::string>("LineFollowerFSMAutoReturnToStart"));
 }
 
 void State::logState(std::string stateName) {
@@ -197,10 +197,6 @@ void IntersectionState::setPath(const std::vector<IntersectionDirection>& path, 
   m_pathRepCnt = 0;
 }
 
-void IntersectionState::resetIntersectionCnt() {
-  m_intersectionInPathCnt = 0;
-}
-
 State &IntersectionState::getNextState(char sensorData) {
   if (m_intersectionInPathCnt < m_numIntersectionsInPath) {
     m_intersectionInPathCnt++;
@@ -333,7 +329,6 @@ void StartState::runMotors(RobotCode::RobotControl::DriveTrain driveTrain) {
 State &StartState::getNextState(char sensorData) {
   m_pathRepCnt++;
   m_intersectionInPathCnt++;
-  std::cout << "Path rep count: " << m_pathRepCnt << std::endl;
   if (countSetBits(sensorData) > 2) {
     IntersectionDirection dir = m_path[m_intersectionInPathCnt - 1];
     if (dir == IntersectionDirection::Straight) {

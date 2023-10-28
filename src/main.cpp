@@ -22,6 +22,7 @@
 
 #include "Utilities/PID.hpp"
 #include "RobotControl/LineFollower.hpp"
+#include "RobotControl/AutoReturnToStart.hpp"
 
 using namespace RobotCode::DeviceManagers;
 using namespace RobotCode::Logging;
@@ -33,7 +34,10 @@ int main() {
   LoggingController::init();
   DeviceManager dm;
   dm.startup();
-  LineFollower lf(dm.getReflectanceSensorManager(), dm.getDriveTrain());
+  LineFollower lf(dm.getReflectanceSensorManager(), dm.getDriveTrain(), dm.getGyroManager(), dm.getLidarLogManager());
+  //AutoReturnToStart as(dm.getLidarLogManager(), dm.getDriveTrain(), dm.getGyroManager(), dm.getReflectanceSensorManager());
+  //as.setTargetRotation(0);
+  //as.returnToStart();
   lf.followLine();
   dm.shutdown();
 

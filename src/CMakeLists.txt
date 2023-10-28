@@ -16,6 +16,8 @@ add_executable(
   RobotControl/DriveTrain.cpp
   RobotControl/LineFollower.cpp
   RobotControl/LineFollowerFSM.cpp
+  RobotControl/AutoReturnToStart.cpp
+  RobotControl/LineFollowerFSMAutoReturnToStart.cpp
 )
 target_include_directories(robot_code PRIVATE ../include)
 
