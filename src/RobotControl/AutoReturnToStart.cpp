@@ -3,10 +3,20 @@
 #include "logging/LidarLogManager.hpp"
 #include <iostream>
 #include <limits>
+#include <boost/log/attributes.hpp>
+#include <boost/log/sources/record_ostream.hpp>
+#include <boost/log/utility/manipulators.hpp>
+#include <boost/log/keywords/channel.hpp>
+#include "Utilities/TimeManager.hpp"
+
+namespace logging = boost::log;
+namespace keywords = boost::log::keywords;
+namespace attrs = boost::log::attributes;
 
 using namespace RobotCode::Logging;
 using namespace RobotCode::DeviceManagers;
 using namespace RobotCode::RobotControl::LineFollowerFSMAutoReturnToStart;
+using namespace RobotCode::Utilities;
 
 namespace RobotCode::RobotControl {
 
@@ -17,16 +27,24 @@ AutoReturnToStart::AutoReturnToStart(LidarLogManager &lidarLogManager,
     lidarLogManager(lidarLogManager),
     driveTrain(driveTrain),
     gyroManager(gyroManager),
-    reflectanceSensorManager(rsm) {}
+    reflectanceSensorManager(rsm),
+    m_logger(keywords::channel = "device") {
+  m_logger.add_attribute("Device", attrs::constant<std::string>("AutoReturnToStart"));
+}
 
 void AutoReturnToStart::returnToStart() {
+  std::cout << "Auto return to start" << std::endl;
+  long long timeLog = std::chrono::duration_cast<std::chrono::nanoseconds>
+      (std::chrono::system_clock::now() - TimeManager::getStartTime()).count();
+  BOOST_LOG(m_logger) << logging::add_value("DataTimeStamp", timeLog) <<
+                      "Auto return to start";
   bool returnedToStart = false;
   while (!returnedToStart) {
     ensureStartDistance();
     rotate();
     driveToFrdBwdMiddle();
     rotate();
-    ensureNotInRgtLftMiddle();
+    ensureRgtLftCorrectDistance();
     returnedToStart = strideToPath() && goToStart() && verifyStart();
   }
 }
@@ -163,6 +181,10 @@ AutoReturnToStart::LidarReadingStatus AutoReturnToStart::checkPoint(rplidar_resp
 }
 
 void AutoReturnToStart::ensureStartDistance() {
+  long long timeLog = std::chrono::duration_cast<std::chrono::nanoseconds>
+      (std::chrono::system_clock::now() - TimeManager::getStartTime()).count();
+  BOOST_LOG(m_logger) << logging::add_value("DataTimeStamp", timeLog) <<
+                      "Ensure start distance";
   rplidar_response_measurement_node_hq_t nodes[8192];
   size_t nodeCount = sizeof(nodes) / sizeof(rplidar_response_measurement_node_hq_t);
 
@@ -269,6 +291,10 @@ void AutoReturnToStart::ensureStartDistance() {
 }
 
 void AutoReturnToStart::rotate() {
+  long long timeLog = std::chrono::duration_cast<std::chrono::nanoseconds>
+      (std::chrono::system_clock::now() - TimeManager::getStartTime()).count();
+  BOOST_LOG(m_logger) << logging::add_value("DataTimeStamp", timeLog) <<
+                      "Rotate";
   float rotationDiff;
   int allClearCnt = 0;
   do {
@@ -375,6 +401,10 @@ AutoReturnToStart::LidarDistances AutoReturnToStart::getDistances(rplidar_respon
 }
 
 void AutoReturnToStart::driveToFrdBwdMiddle() {
+  long long timeLog = std::chrono::duration_cast<std::chrono::nanoseconds>
+      (std::chrono::system_clock::now() - TimeManager::getStartTime()).count();
+  BOOST_LOG(m_logger) << logging::add_value("DataTimeStamp", timeLog) <<
+                      "Drive to frd bwd middle";
   float goalCm = 147.f/2/2 + 15;
   float min = (goalCm - 2)/100;
   float max = (goalCm + 2)/100;
@@ -427,7 +457,11 @@ void AutoReturnToStart::driveToFrdBwdMiddle() {
   } while (allClearCnt < 5);
 }
 
-void AutoReturnToStart::ensureNotInRgtLftMiddle() {
+void AutoReturnToStart::ensureRgtLftCorrectDistance() {
+  long long timeLog = std::chrono::duration_cast<std::chrono::nanoseconds>
+      (std::chrono::system_clock::now() - TimeManager::getStartTime()).count();
+  BOOST_LOG(m_logger) << logging::add_value("DataTimeStamp", timeLog) <<
+                      "Ensure rgt lft correct distance";
   rplidar_response_measurement_node_hq_t nodes[8192];
   size_t nodeCount = sizeof(nodes) / sizeof(rplidar_response_measurement_node_hq_t);
 
@@ -468,6 +502,10 @@ int countSetBits(int n) {
 }
 
 bool AutoReturnToStart::strideToPath() {
+  long long timeLog = std::chrono::duration_cast<std::chrono::nanoseconds>
+      (std::chrono::system_clock::now() - TimeManager::getStartTime()).count();
+  BOOST_LOG(m_logger) << logging::add_value("DataTimeStamp", timeLog) <<
+                      "Stride to path";
   rplidar_response_measurement_node_hq_t nodes[8192];
   size_t nodeCount = sizeof(nodes) / sizeof(rplidar_response_measurement_node_hq_t);
 
@@ -516,6 +554,10 @@ int findClosestIndex(const std::array<float, 4>& arr, float target) {
 }
 
 bool AutoReturnToStart::goToStart() {
+  long long timeLog = std::chrono::duration_cast<std::chrono::nanoseconds>
+      (std::chrono::system_clock::now() - TimeManager::getStartTime()).count();
+  BOOST_LOG(m_logger) << logging::add_value("DataTimeStamp", timeLog) <<
+                      "Go to start";
   std::vector<State::IntersectionDirection> path;
   std::array<float, 4> distanceRatios = {0.162, 0.455, 1.934, 5.63};
   rplidar_response_measurement_node_hq_t nodes[8192];
@@ -567,6 +609,10 @@ bool AutoReturnToStart::goToStart() {
 }
 
 bool AutoReturnToStart::verifyStart() {
+  long long timeLog = std::chrono::duration_cast<std::chrono::nanoseconds>
+      (std::chrono::system_clock::now() - TimeManager::getStartTime()).count();
+  BOOST_LOG(m_logger) << logging::add_value("DataTimeStamp", timeLog) <<
+                      "Verify start";
   rplidar_response_measurement_node_hq_t nodes[8192];
   size_t nodeCount = sizeof(nodes) / sizeof(rplidar_response_measurement_node_hq_t);
   lidarLogManager.getScanData(nodes, nodeCount);

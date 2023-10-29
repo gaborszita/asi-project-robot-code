@@ -310,7 +310,7 @@ State &IntersectionWaitState::getNextState(char sensorData) {
     if (countSetBits(sensorData) <= 2) {
       return StateManager::getIntersectionBackupState();
     } else if (m_pathRepCnt < m_pathRep) {
-      return StateManager::getStartState();
+      return StateManager::getPathEndState();
     } else {
       return StateManager::getEndState();
     }
@@ -456,6 +456,15 @@ std::string EndState::endStatus() {
   return "End";
 }
 
+void PathEndState::runMotors(RobotCode::RobotControl::DriveTrain driveTrain) {
+  logState("PathEnd");
+  driveTrain.stop();
+}
+
+State &PathEndState::getNextState(char sensorData) {
+  return StateManager::getStartState();
+}
+
 CenterState &StateManager::getCenterState() {
   return centerState;
 }
@@ -528,6 +537,10 @@ IntersectionBackupState &StateManager::getIntersectionBackupState() {
   return intersectionBackupState;
 }
 
+PathEndState &StateManager::getPathEndState() {
+  return pathEndState;
+}
+
 CenterState StateManager::centerState;
 TurnLeftState StateManager::turnLeftState;
 RotateLeftState StateManager::rotateLeftState;
@@ -546,6 +559,7 @@ CorrectErrorState StateManager::correctErrorState;
 StartState StateManager::startState;
 EndState StateManager::endState;
 IntersectionBackupState StateManager::intersectionBackupState;
+PathEndState StateManager::pathEndState;
 
 unsigned int State::m_intersectionInPathCnt = 0;
 unsigned int State::m_numIntersectionsInPath = 0;

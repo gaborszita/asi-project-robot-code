@@ -5,6 +5,7 @@
 #include "RobotControl/DriveTrain.hpp"
 #include "DeviceManagers/GyroManager.hpp"
 #include "DeviceManagers/ReflectanceSensorManager.hpp"
+#include <boost/log/sources/channel_logger.hpp>
 
 namespace RobotCode::RobotControl {
 
@@ -19,7 +20,7 @@ class AutoReturnToStart {
   void ensureStartDistance();
   void rotate();
   void driveToFrdBwdMiddle();
-  void ensureNotInRgtLftMiddle();
+  void ensureRgtLftCorrectDistance();
   bool strideToPath();
   bool goToStart();
   bool verifyStart();
@@ -50,6 +51,7 @@ class AutoReturnToStart {
   RobotCode::DeviceManagers::GyroManager &gyroManager;
   RobotCode::DeviceManagers::ReflectanceSensorManager &reflectanceSensorManager;
   float m_targetRotation = 0;
+  boost::log::sources::channel_logger<> m_logger;
 };
 
 }

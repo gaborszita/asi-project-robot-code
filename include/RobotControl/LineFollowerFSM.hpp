@@ -179,6 +179,12 @@ class IntersectionBackupState : public State {
   State &getNextState(char sensorData) override;
 };
 
+class PathEndState : public State {
+ public:
+  void runMotors(DriveTrain driveTrain) override;
+  State &getNextState(char sensorData) override;
+};
+
 class StateManager {
  public:
   static CenterState &getCenterState();
@@ -199,6 +205,7 @@ class StateManager {
   static StartState &getStartState();
   static EndState &getEndState();
   static IntersectionBackupState &getIntersectionBackupState();
+  static PathEndState &getPathEndState();
 
  private:
   static CenterState centerState;
@@ -219,6 +226,7 @@ class StateManager {
   static EndState endState;
   static IntersectionWaitState intersectionWaitState;
   static IntersectionBackupState intersectionBackupState;
+  static PathEndState pathEndState;
 };
 
 }

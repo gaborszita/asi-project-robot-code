@@ -192,9 +192,7 @@ void IntersectionState::runMotors(RobotCode::RobotControl::DriveTrain driveTrain
 void IntersectionState::setPath(const std::vector<IntersectionDirection>& path, int pathRep) {
   m_numIntersectionsInPath = path.size();
   m_path = path;
-  m_pathRep = pathRep;
   m_intersectionInPathCnt = 0;
-  m_pathRepCnt = 0;
 }
 
 State &IntersectionState::getNextState(char sensorData) {
@@ -305,8 +303,6 @@ State &IntersectionWaitState::getNextState(char sensorData) {
   if (timeNow > m_continueTime) {
     if (countSetBits(sensorData) <= 2) {
       return StateManager::getIntersectionBackupState();
-    } else if (m_pathRepCnt < m_pathRep) {
-      return StateManager::getStartState();
     } else {
       return StateManager::getEndState();
     }
@@ -327,7 +323,6 @@ void StartState::runMotors(RobotCode::RobotControl::DriveTrain driveTrain) {
 }
 
 State &StartState::getNextState(char sensorData) {
-  m_pathRepCnt++;
   m_intersectionInPathCnt++;
   if (countSetBits(sensorData) > 2) {
     IntersectionDirection dir = m_path[m_intersectionInPathCnt - 1];
@@ -544,8 +539,6 @@ IntersectionBackupState StateManager::intersectionBackupState;
 
 unsigned int State::m_intersectionInPathCnt = 0;
 unsigned int State::m_numIntersectionsInPath = 0;
-unsigned int State::m_pathRep = 0;
-unsigned int State::m_pathRepCnt = 0;
 std::vector<State::IntersectionDirection> State::m_path;
 
 }

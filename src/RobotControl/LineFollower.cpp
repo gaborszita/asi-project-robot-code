@@ -52,7 +52,7 @@ void LineFollower::followLine() {
   path.push_back(State::IntersectionDirection::Left);
   path.push_back(State::IntersectionDirection::Left);
   path.push_back(State::IntersectionDirection::Left);
-  StateManager::getIntersectionState().setPath(path, 100);
+  StateManager::getIntersectionState().setPath(path, 10);
   AutoReturnToStart as(lidarLogManager, driveTrain, gyroManager, rsm);
   float lastStartAngle = gyroManager.getGyroZ();
   as.setTargetRotation(lastStartAngle);
@@ -67,18 +67,29 @@ void LineFollower::followLine() {
     char data = rsm.getSensorValues() & 0x7E;
 
     currentState = &currentState->getNextState(data);
-    currentState->runMotors(driveTrain);
 
-    if (currentState == &StateManager::getStartState() && as.verifyStart()) {
+    bool verifyResult = false;
+    if (currentState == &StateManager::getPathEndState() || currentState == &StateManager::getEndState()) {
+      verifyResult = as.verifyStart();
+    }
+
+    if (verifyResult) {
       lastStartAngle = gyroManager.getGyroZ();
       as.setTargetRotation(lastStartAngle);
     }
 
     if ((currentState->isEnd() && !currentState->isEndNormal()) ||
-        (currentState == &StateManager::getStartState()) && !as.verifyStart()) {
+        (currentState == &StateManager::getPathEndState()) && !verifyResult) {
       as.returnToStart();
+      StateManager::getIntersectionState().resetIntersectionCnt();
       currentState = &StateManager::getStartState();
     }
+
+    if (currentState == &StateManager::getEndState() && !verifyResult) {
+      currentState = &StateManager::getErrorState();
+    }
+
+    currentState->runMotors(driveTrain);
   }
   auto time = std::chrono::system_clock::now();
   long long timeLog = std::chrono::duration_cast<std::chrono::nanoseconds>

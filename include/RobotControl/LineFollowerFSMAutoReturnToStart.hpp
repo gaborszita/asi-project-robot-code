@@ -27,9 +27,7 @@ class State {
   void logState(std::string stateName);
 
   static unsigned int m_numIntersectionsInPath;
-  static unsigned int m_pathRep;
   static unsigned int m_intersectionInPathCnt;
-  static unsigned int m_pathRepCnt;
   static std::vector<IntersectionDirection> m_path;
 };
 
