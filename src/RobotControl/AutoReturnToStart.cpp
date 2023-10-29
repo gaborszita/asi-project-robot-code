@@ -597,12 +597,30 @@ bool AutoReturnToStart::goToStart() {
     path.push_back(State::IntersectionDirection::Left);
   }
   StateManager::getIntersectionState().setPath(path, 1);
+  std::chrono::time_point<std::chrono::system_clock> lastIntersectionTime = std::chrono::system_clock::now();
   State *currentState = &StateManager::getStartState();
   currentState->runMotors(driveTrain);
   while (!currentState->isEnd()) {
     std::this_thread::sleep_for(std::chrono::milliseconds(1));
     char data = reflectanceSensorManager.getSensorValues() & 0x7E;
     currentState = &currentState->getNextState(data);
+
+    auto timeNow = std::chrono::system_clock::now();
+
+    if (currentState == &StateManager::getIntersectionState()) {
+      lastIntersectionTime = timeNow;
+    }
+
+    if (timeNow - lastIntersectionTime > std::chrono::seconds (20) &&
+        currentState != &StateManager::getEndState() &&
+        currentState != &StateManager::getErrorState()) {
+      std::cout << "Robot stuck detected during auto return to start" << std::endl;
+      BOOST_LOG(m_logger) << logging::add_value("DataTimeStamp", timeNow) <<
+                          "Robot stuck detected during auto return to start";
+      driveTrain.stop();
+      return false;
+    }
+
     currentState->runMotors(driveTrain);
   }
   return currentState->isEndNormal();
