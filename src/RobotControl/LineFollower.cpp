@@ -82,6 +82,7 @@ void LineFollower::followLine() {
         (currentState == &StateManager::getPathEndState()) && !verifyResult) {
       as.returnToStart();
       StateManager::getIntersectionState().resetIntersectionCnt();
+      StateManager::getIntersectionState().incrementPathRep();
       currentState = &StateManager::getStartState();
     }
 

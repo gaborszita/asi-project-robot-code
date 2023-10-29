@@ -201,6 +201,10 @@ void IntersectionState::resetIntersectionCnt() {
   m_intersectionInPathCnt = 0;
 }
 
+void IntersectionState::incrementPathRep() {
+  m_pathRep++;
+}
+
 State &IntersectionState::getNextState(char sensorData) {
   if (m_intersectionInPathCnt < m_numIntersectionsInPath) {
     m_intersectionInPathCnt++;

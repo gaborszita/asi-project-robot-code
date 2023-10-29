@@ -90,6 +90,7 @@ class IntersectionState : public State {
   State &getNextState(char sensorData) override;
 
   void setPath(const std::vector<IntersectionDirection>& path, int pathRep);
+  void incrementPathRep();
   void resetIntersectionCnt();
 };
 
