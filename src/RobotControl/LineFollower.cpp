@@ -109,6 +109,7 @@ void LineFollower::followLine() {
       StateManager::getIntersectionState().resetIntersectionCnt();
       StateManager::getIntersectionState().incrementPathRep();
       currentState = &StateManager::getStartState();
+      lastIntersectionTime = timeNow;
     }
 
     currentState->runMotors(driveTrain);
