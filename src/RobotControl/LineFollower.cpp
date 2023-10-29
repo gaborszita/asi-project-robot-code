@@ -103,6 +103,8 @@ void LineFollower::followLine() {
         currentState != &StateManager::getEndState() &&
         currentState != &StateManager::getErrorState()) {
       std::cout << "Robot stuck detected, auto return to start" << std::endl;
+      BOOST_LOG(m_logger) << logging::add_value("DataTimeStamp", timeNow) <<
+                          "Robot stuck detected";
       as.returnToStart();
       StateManager::getIntersectionState().resetIntersectionCnt();
       StateManager::getIntersectionState().incrementPathRep();
