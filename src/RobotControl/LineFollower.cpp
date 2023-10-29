@@ -59,6 +59,7 @@ void LineFollower::followLine() {
   if (!as.verifyStart()) {
     as.returnToStart();
   }
+  std::chrono::time_point<std::chrono::system_clock> lastIntersectionTime = std::chrono::system_clock::now();
   State *currentState = &StateManager::getStartState();
   currentState->runMotors(driveTrain);
   while (!currentState->isEnd()) {
@@ -88,6 +89,24 @@ void LineFollower::followLine() {
 
     if (currentState == &StateManager::getEndState() && !verifyResult) {
       currentState = &StateManager::getErrorState();
+    }
+
+    auto timeNow = std::chrono::system_clock::now();
+
+    if (currentState == &StateManager::getIntersectionState() ||
+        currentState == &StateManager::getStartState()) {
+      lastIntersectionTime = timeNow;
+    }
+
+    if (timeNow - lastIntersectionTime > std::chrono::seconds (20) &&
+        currentState != &StateManager::getPathEndState() &&
+        currentState != &StateManager::getEndState() &&
+        currentState != &StateManager::getErrorState()) {
+      std::cout << "Robot stuck detected, auto return to start" << std::endl;
+      as.returnToStart();
+      StateManager::getIntersectionState().resetIntersectionCnt();
+      StateManager::getIntersectionState().incrementPathRep();
+      currentState = &StateManager::getStartState();
     }
 
     currentState->runMotors(driveTrain);
