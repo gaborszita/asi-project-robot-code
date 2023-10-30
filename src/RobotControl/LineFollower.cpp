@@ -54,7 +54,7 @@ void LineFollower::followLine() {
   path.push_back(State::IntersectionDirection::Left);
   StateManager::getIntersectionState().setPath(path, 200);
   AutoReturnToStart as(lidarLogManager, driveTrain, gyroManager, rsm);
-  float lastStartAngle = gyroManager.getGyroZ();
+  double lastStartAngle = gyroManager.getGyroZ();
   as.setTargetRotation(lastStartAngle);
   if (!as.verifyStart()) {
     as.returnToStart();

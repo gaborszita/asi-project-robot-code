@@ -62,13 +62,13 @@ AutoReturnToStart::LidarReadingStatus AutoReturnToStart::checkPoint(rplidar_resp
   float consecutiveStartAngle;
   float consecutiveInvalidStartAngle;
   float frontAverage = 0;
-  float frontCnt = 0;
+  int frontCnt = 0;
   float backAverage = 0;
-  float backCnt = 0;
+  int backCnt = 0;
   float rightAverage = 0;
-  float rightCnt = 0;
+  int rightCnt = 0;
   float leftAverage = 0;
-  float leftCnt = 0;
+  int leftCnt = 0;
   for (int i = 0; i < nodeCount; i++) {
     float angle_in_degrees = nodes[i].angle_z_q14 * 90.f / (1 << 14);
     float distance_in_meters = nodes[i].dist_mm_q2 / 1000.f / (1 << 2);
@@ -146,12 +146,12 @@ AutoReturnToStart::LidarReadingStatus AutoReturnToStart::checkPoint(rplidar_resp
   }
 
   if (frontCnt > 0) {
-    frontAverage /= frontCnt;
+    frontAverage /= (float) frontCnt;
   } else {
     frontAverage = std::numeric_limits<float>::max();;
   }
   if (backCnt > 0) {
-    backAverage /= backCnt;
+    backAverage /= (float) backCnt;
   } else {
     backAverage = std::numeric_limits<float>::max();;
   }
@@ -162,12 +162,12 @@ AutoReturnToStart::LidarReadingStatus AutoReturnToStart::checkPoint(rplidar_resp
   }
 
   if (rightCnt > 0) {
-    rightAverage /= rightCnt;
+    rightAverage /= (float) rightCnt;
   } else {
     rightAverage = std::numeric_limits<float>::max();;
   }
   if (leftCnt > 0) {
-    leftAverage /= leftCnt;
+    leftAverage /= (float) leftCnt;
   } else {
     leftAverage = std::numeric_limits<float>::max();;
   }
@@ -295,10 +295,10 @@ void AutoReturnToStart::rotate() {
       (std::chrono::system_clock::now() - TimeManager::getStartTime()).count();
   BOOST_LOG(m_logger) << logging::add_value("DataTimeStamp", timeLog) <<
                       "Rotate";
-  float rotationDiff;
+  double rotationDiff;
   int allClearCnt = 0;
   do {
-    float currentRotation = gyroManager.getGyroZ();
+    double currentRotation = gyroManager.getGyroZ();
     while (currentRotation >= 360) {
       currentRotation -= 360;
     }
@@ -333,7 +333,7 @@ void AutoReturnToStart::rotate() {
   } while (allClearCnt < 5);
 }
 
-void AutoReturnToStart::setTargetRotation(float targetRotation) {
+void AutoReturnToStart::setTargetRotation(double targetRotation) {
   while (targetRotation >= 360) {
     targetRotation -= 360;
   }
@@ -347,13 +347,13 @@ AutoReturnToStart::LidarDistances AutoReturnToStart::getDistances(rplidar_respon
                                                                   size_t nodeCount) {
   LidarDistances distances{};
   float frontAverage = 0;
-  float frontCnt = 0;
+  int frontCnt = 0;
   float backAverage = 0;
-  float backCnt = 0;
+  int backCnt = 0;
   float rightAverage = 0;
-  float rightCnt = 0;
+  int rightCnt = 0;
   float leftAverage = 0;
-  float leftCnt = 0;
+  int leftCnt = 0;
   for (int i = 0; i < nodeCount; i++) {
     float angle_in_degrees = nodes[i].angle_z_q14 * 90.f / (1 << 14);
     float distance_in_meters = nodes[i].dist_mm_q2 / 1000.f / (1 << 2);
@@ -373,22 +373,22 @@ AutoReturnToStart::LidarDistances AutoReturnToStart::getDistances(rplidar_respon
     }
   }
   if (frontCnt > 0) {
-    frontAverage /= frontCnt;
+    frontAverage /= (float) frontCnt;
   } else {
     frontAverage = std::numeric_limits<float>::max();;
   }
   if (backCnt > 0) {
-    backAverage /= backCnt;
+    backAverage /= (float) backCnt;
   } else {
     backAverage = std::numeric_limits<float>::max();;
   }
   if (rightCnt > 0) {
-    rightAverage /= rightCnt;
+    rightAverage /= (float) rightCnt;
   } else {
     rightAverage = std::numeric_limits<float>::max();;
   }
   if (leftCnt > 0) {
-    leftAverage /= leftCnt;
+    leftAverage /= (float) leftCnt;
   } else {
     leftAverage = std::numeric_limits<float>::max();;
   }
@@ -635,7 +635,7 @@ bool AutoReturnToStart::verifyStart() {
   size_t nodeCount = sizeof(nodes) / sizeof(rplidar_response_measurement_node_hq_t);
   lidarLogManager.getScanData(nodes, nodeCount);
   LidarDistances distances = getDistances(nodes, nodeCount);
-  float rotation = gyroManager.getGyroZ();
+  double rotation = gyroManager.getGyroZ();
   while (rotation >= 360) {
     rotation -= 360;
   }
@@ -658,7 +658,7 @@ bool AutoReturnToStart::verifyStart() {
   while (angleDiff > 180) {
       angleDiff = 360 - angleDiff;
   }
-  float rotationTolerance = 25;
+  double rotationTolerance = 25;
 
   return distances.front >= frontMin &&
          distances.front <= frontMax &&

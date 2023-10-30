@@ -16,15 +16,15 @@ class MouseManager {
   void startMouseThread();
   void quickStop();
   void stopMouseThread();
-  [[nodiscard]] float getX() const;
-  [[nodiscard]] float getY() const;
+  [[nodiscard]] double getX() const;
+  [[nodiscard]] double getY() const;
  private:
   void update();
   bool threadRunning = false;
   bool threadStopQueued = false;
 
-  std::atomic<float> x = 0;
-  std::atomic<float> y = 0;
+  std::atomic<double> x = 0;
+  std::atomic<double> y = 0;
   static const std::string mouseDevicePath;
   // dots per centimeter(dpcm) NOT dots per inch(DPI),
   // convert DPI to dpcm by multiplying DPI by 0.393

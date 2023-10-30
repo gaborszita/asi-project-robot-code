@@ -20,17 +20,17 @@ class GyroManager {
   void quickStop();
   void stopUpdateThread();
   void resetGyroXYZ();
-  [[nodiscard]] float getGyroX() const;
-  [[nodiscard]] float getGyroY() const;
-  [[nodiscard]] float getGyroZ() const;
-  [[nodiscard]] float getGyroXRaw() const;
-  [[nodiscard]] float getGyroYRaw() const;
-  [[nodiscard]] float getGyroZRaw() const;
-  [[nodiscard]] float getAccelXRaw() const;
-  [[nodiscard]] float getAccelYRaw() const;
-  [[nodiscard]] float getAccelZRaw() const;
-  [[nodiscard]] float getTempRaw() const;
-  [[nodiscard]] float getTemp() const;
+  [[nodiscard]] double getGyroX() const;
+  [[nodiscard]] double getGyroY() const;
+  [[nodiscard]] double getGyroZ() const;
+  [[nodiscard]] double getGyroXRaw() const;
+  [[nodiscard]] double getGyroYRaw() const;
+  [[nodiscard]] double getGyroZRaw() const;
+  [[nodiscard]] double getAccelXRaw() const;
+  [[nodiscard]] double getAccelYRaw() const;
+  [[nodiscard]] double getAccelZRaw() const;
+  [[nodiscard]] double getTempRaw() const;
+  [[nodiscard]] double getTemp() const;
 
  private:
   [[nodiscard]] short readRawData(int highRegister, int lowRegister) const;
@@ -63,16 +63,16 @@ class GyroManager {
   static const int SMPLRT_DIV = 0x03;
   static const int SAMPLE_RATE = (DLPF_ENABLED ? 1000 : 8000) / (1 + SMPLRT_DIV);
 
-  constexpr static const float GYRO_X_OFFSET = -2.56;
-  constexpr static const float GYRO_Y_OFFSET = +1.02;
-  constexpr static const float GYRO_Z_OFFSET = +0.225;
-  constexpr static const float ACCEL_X_OFFSET = +0.066;
-  constexpr static const float ACCEL_Y_OFFSET = +0.072;
-  constexpr static const float ACCEL_Z_OFFSET = +0.96;
+  constexpr static const double GYRO_X_OFFSET = -2.56;
+  constexpr static const double GYRO_Y_OFFSET = +1.02;
+  constexpr static const double GYRO_Z_OFFSET = +0.225;
+  constexpr static const double ACCEL_X_OFFSET = +0.066;
+  constexpr static const double ACCEL_Y_OFFSET = +0.072;
+  constexpr static const double ACCEL_Z_OFFSET = +0.96;
 
-  std::atomic<float> gyroX = 0;
-  std::atomic<float> gyroY = 0;
-  std::atomic<float> gyroZ = 0;
+  std::atomic<double> gyroX = 0;
+  std::atomic<double> gyroY = 0;
+  std::atomic<double> gyroZ = 0;
 
   std::thread updateThread;
   bool threadRunning = false;

@@ -41,11 +41,11 @@ void MouseManager::stopMouseThread() {
   threadStopQueued = true;
 }
 
-float MouseManager::getX() const {
+double MouseManager::getX() const {
   return x;
 }
 
-float MouseManager::getY() const {
+double MouseManager::getY() const {
   return y;
 }
 
@@ -67,14 +67,14 @@ void MouseManager::update() {
       break;
     }
 
-    float xMetersMov;
-    float yMetersMov;
+    double xMetersMov;
+    double yMetersMov;
 
     if (mouseDevice) {
       auto xRead = static_cast<signed char>(data[1]);
       auto yRead = static_cast<signed char>(data[2]);
-      xMetersMov = (float) xRead / MOUSE_DOTS_PER_METER;
-      yMetersMov = (float) yRead / MOUSE_DOTS_PER_METER;
+      xMetersMov = (double) xRead / MOUSE_DOTS_PER_METER;
+      yMetersMov = (double) yRead / MOUSE_DOTS_PER_METER;
       x.fetch_add(xMetersMov);
       y.fetch_add(yMetersMov);
     }

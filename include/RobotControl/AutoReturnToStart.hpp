@@ -24,7 +24,7 @@ class AutoReturnToStart {
   bool strideToPath();
   bool goToStart();
   bool verifyStart();
-  void setTargetRotation(float targetRotation);
+  void setTargetRotation(double targetRotation);
  private:
   struct LidarReadingStatus {
     bool frontTooClose;
@@ -50,7 +50,7 @@ class AutoReturnToStart {
   RobotCode::RobotControl::DriveTrain &driveTrain;
   RobotCode::DeviceManagers::GyroManager &gyroManager;
   RobotCode::DeviceManagers::ReflectanceSensorManager &reflectanceSensorManager;
-  float m_targetRotation = 0;
+  double m_targetRotation = 0;
   boost::log::sources::channel_logger<> m_logger;
 };
 

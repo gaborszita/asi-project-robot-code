@@ -112,13 +112,13 @@ void GyroManager::update() {
     if (threadInterrupt) {
       run = false;
     }
-    float gyroXRaw = getGyroXRaw();
-    float gyroYRaw = getGyroYRaw();
-    float gyroZRaw = getGyroZRaw();
+    double gyroXRaw = getGyroXRaw();
+    double gyroYRaw = getGyroYRaw();
+    double gyroZRaw = getGyroZRaw();
     auto endTime = std::chrono::system_clock::now();
     auto dt = endTime - startTime;
     startTime = endTime;
-    float dtSeconds = std::chrono::duration_cast<std::chrono::duration<float>>(dt).count();
+    double dtSeconds = std::chrono::duration_cast<std::chrono::duration<double>>(dt).count();
     gyroX.fetch_add(gyroXRaw * dtSeconds);
     gyroY.fetch_add(gyroYRaw * dtSeconds);
     gyroZ.fetch_add(gyroZRaw * dtSeconds);
@@ -126,47 +126,47 @@ void GyroManager::update() {
   }
 }
 
-float GyroManager::getGyroXRaw() const {
+double GyroManager::getGyroXRaw() const {
   ensureInitialized();
-  return (float) readRawData(GYRO_XOUT_H_REGISTER, GYRO_XOUT_L_REGISTER)/131.0f - GYRO_X_OFFSET;
+  return (double) readRawData(GYRO_XOUT_H_REGISTER, GYRO_XOUT_L_REGISTER)/131.0 - GYRO_X_OFFSET;
 }
 
-float GyroManager::getGyroYRaw() const {
+double GyroManager::getGyroYRaw() const {
   ensureInitialized();
-  return (float) readRawData(GYRO_YOUT_H_REGISTER, GYRO_YOUT_L_REGISTER)/131.0f - GYRO_Y_OFFSET;
+  return (double) readRawData(GYRO_YOUT_H_REGISTER, GYRO_YOUT_L_REGISTER)/131.0 - GYRO_Y_OFFSET;
 }
 
-float GyroManager::getGyroZRaw() const {
+double GyroManager::getGyroZRaw() const {
   ensureInitialized();
-  return (float) readRawData(GYRO_ZOUT_H_REGISTER, GYRO_ZOUT_L_REGISTER)/131.0f - GYRO_Z_OFFSET;
+  return (double) readRawData(GYRO_ZOUT_H_REGISTER, GYRO_ZOUT_L_REGISTER)/131.0 - GYRO_Z_OFFSET;
 }
 
-float GyroManager::getAccelXRaw() const {
+double GyroManager::getAccelXRaw() const {
   ensureInitialized();
-  return (float) readRawData(ACCEL_XOUT_H_REGISTER, ACCEL_XOUT_L_REGISTER)/16384.0f - ACCEL_X_OFFSET;
+  return (double) readRawData(ACCEL_XOUT_H_REGISTER, ACCEL_XOUT_L_REGISTER)/16384.0 - ACCEL_X_OFFSET;
 }
 
-float GyroManager::getAccelYRaw() const {
+double GyroManager::getAccelYRaw() const {
   ensureInitialized();
-  return (float) readRawData(ACCEL_YOUT_H_REGISTER, ACCEL_YOUT_L_REGISTER)/16384.0f - ACCEL_Y_OFFSET;
+  return (double) readRawData(ACCEL_YOUT_H_REGISTER, ACCEL_YOUT_L_REGISTER)/16384.0 - ACCEL_Y_OFFSET;
 }
 
-float GyroManager::getAccelZRaw() const {
+double GyroManager::getAccelZRaw() const {
   ensureInitialized();
-  return (float) readRawData(ACCEL_ZOUT_H_REGISTER, ACCEL_ZOUT_L_REGISTER)/16384.0f - ACCEL_Z_OFFSET;
+  return (double) readRawData(ACCEL_ZOUT_H_REGISTER, ACCEL_ZOUT_L_REGISTER)/16384.0 - ACCEL_Z_OFFSET;
 }
 
-float GyroManager::getGyroX() const {
+double GyroManager::getGyroX() const {
   ensureInitialized();
   return gyroX;
 }
 
-float GyroManager::getGyroY() const {
+double GyroManager::getGyroY() const {
   ensureInitialized();
   return gyroY;
 }
 
-float GyroManager::getGyroZ() const {
+double GyroManager::getGyroZ() const {
   ensureInitialized();
   return gyroZ;
 }
@@ -184,14 +184,14 @@ void GyroManager::ensureInitialized() const {
   }
 }
 
-float GyroManager::getTempRaw() const {
+double GyroManager::getTempRaw() const {
   ensureInitialized();
   return readRawData(TEMP_OUT_H_REGISTER, TEMP_OUT_L_REGISTER);
 }
 
-float GyroManager::getTemp() const {
+double GyroManager::getTemp() const {
   ensureInitialized();
-  return getTempRaw() / 340.f + 36.53f;
+  return getTempRaw() / 340 + 36.53;
 }
 
 void GyroManager::resetGyroXYZ() {
