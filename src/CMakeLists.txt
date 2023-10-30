@@ -62,3 +62,5 @@ find_package(
 
 target_include_directories(robot_code PRIVATE ${Boost_INCLUDE_DIRS})
 target_link_libraries(robot_code PRIVATE Boost::log)
+
+target_link_libraries(robot_code PRIVATE atomic)
