@@ -637,17 +637,17 @@ bool AutoReturnToStart::verifyStart() {
   LidarDistances distances = getDistances(nodes, nodeCount);
   float rotation = gyroManager.getGyroZ();
   float frontGoalCm = 105;
-  float frontMin = (frontGoalCm - 5)/100;
-  float frontMax = (frontGoalCm + 5)/100;
+  float frontMin = (frontGoalCm - 9.5f)/100;
+  float frontMax = (frontGoalCm + 9.5f)/100;
   float backGoalCm = 42;
-  float backMin = (backGoalCm - 4)/100;
-  float backMax = (backGoalCm + 4)/100;
+  float backMin = (backGoalCm - 7)/100;
+  float backMax = (backGoalCm + 7)/100;
   float rightGoalCm = 86;
-  float rightMin = (rightGoalCm - 7)/100;
-  float rightMax = (rightGoalCm + 7)/100;
+  float rightMin = (rightGoalCm - 12)/100;
+  float rightMax = (rightGoalCm + 12)/100;
   float leftGoalCm = 94;
-  float leftMin = (leftGoalCm - 7)/100;
-  float leftMax = (leftGoalCm + 7)/100;
+  float leftMin = (leftGoalCm - 12)/100;
+  float leftMax = (leftGoalCm + 12)/100;
   float rotationMin = m_targetRotation - 25;
   float rotationMax = m_targetRotation + 25;
 
