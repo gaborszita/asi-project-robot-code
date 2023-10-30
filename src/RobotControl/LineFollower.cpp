@@ -85,6 +85,8 @@ void LineFollower::followLine() {
       StateManager::getIntersectionState().resetIntersectionCnt();
       StateManager::getIntersectionState().incrementPathRep();
       currentState = &StateManager::getStartState();
+      lastStartAngle = gyroManager.getGyroZ();
+      as.setTargetRotation(lastStartAngle);
     }
 
     if (currentState == &StateManager::getEndState() && !verifyResult) {
@@ -110,6 +112,8 @@ void LineFollower::followLine() {
       StateManager::getIntersectionState().incrementPathRep();
       currentState = &StateManager::getStartState();
       lastIntersectionTime = timeNow;
+      lastStartAngle = gyroManager.getGyroZ();
+      as.setTargetRotation(lastStartAngle);
     }
 
     currentState->runMotors(driveTrain);
