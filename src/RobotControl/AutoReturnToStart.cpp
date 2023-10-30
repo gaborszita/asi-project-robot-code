@@ -635,20 +635,21 @@ bool AutoReturnToStart::verifyStart() {
   size_t nodeCount = sizeof(nodes) / sizeof(rplidar_response_measurement_node_hq_t);
   lidarLogManager.getScanData(nodes, nodeCount);
   LidarDistances distances = getDistances(nodes, nodeCount);
+  float rotation = gyroManager.getGyroZ();
   float frontGoalCm = 105;
   float frontMin = (frontGoalCm - 5)/100;
   float frontMax = (frontGoalCm + 5)/100;
   float backGoalCm = 42;
-  float backMin = (backGoalCm - 5)/100;
-  float backMax = (backGoalCm + 5)/100;
+  float backMin = (backGoalCm - 4)/100;
+  float backMax = (backGoalCm + 4)/100;
   float rightGoalCm = 86;
-  float rightMin = (rightGoalCm - 5)/100;
-  float rightMax = (rightGoalCm + 5)/100;
+  float rightMin = (rightGoalCm - 7)/100;
+  float rightMax = (rightGoalCm + 7)/100;
   float leftGoalCm = 94;
-  float leftMin = (leftGoalCm - 5)/100;
-  float leftMax = (leftGoalCm + 5)/100;
-  float rotationMin = m_targetRotation - 23;
-  float rotationMax = m_targetRotation + 23;
+  float leftMin = (leftGoalCm - 7)/100;
+  float leftMax = (leftGoalCm + 7)/100;
+  float rotationMin = m_targetRotation - 25;
+  float rotationMax = m_targetRotation + 25;
 
   return distances.front >= frontMin &&
          distances.front <= frontMax &&
@@ -657,7 +658,9 @@ bool AutoReturnToStart::verifyStart() {
          distances.right >= rightMin &&
          distances.right <= rightMax &&
          distances.left >= leftMin &&
-         distances.left <= leftMax;
+         distances.left <= leftMax &&
+         rotation >= rotationMin &&
+         rotation <= rotationMax;
 }
 
 }
