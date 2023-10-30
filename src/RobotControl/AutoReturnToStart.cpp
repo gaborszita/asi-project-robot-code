@@ -299,7 +299,7 @@ void AutoReturnToStart::rotate() {
   int allClearCnt = 0;
   do {
     float currentRotation = gyroManager.getGyroZ();
-    while (currentRotation > 360) {
+    while (currentRotation >= 360) {
       currentRotation -= 360;
     }
     while (currentRotation < 0) {
@@ -334,7 +334,7 @@ void AutoReturnToStart::rotate() {
 }
 
 void AutoReturnToStart::setTargetRotation(float targetRotation) {
-  while (targetRotation > 360) {
+  while (targetRotation >= 360) {
     targetRotation -= 360;
   }
   while (targetRotation < 0) {
@@ -636,7 +636,7 @@ bool AutoReturnToStart::verifyStart() {
   lidarLogManager.getScanData(nodes, nodeCount);
   LidarDistances distances = getDistances(nodes, nodeCount);
   float rotation = gyroManager.getGyroZ();
-  while (rotation > 360) {
+  while (rotation >= 360) {
     rotation -= 360;
   }
   while (rotation < 0) {
@@ -654,8 +654,11 @@ bool AutoReturnToStart::verifyStart() {
   float leftGoalCm = 94;
   float leftMin = (leftGoalCm - 10)/100;
   float leftMax = (leftGoalCm + 10)/100;
-  float rotationMin = m_targetRotation - 25;
-  float rotationMax = m_targetRotation + 25;
+  double angleDiff = std::abs(rotation - m_targetRotation);
+  while (angleDiff > 180) {
+      angleDiff = 360 - angleDiff;
+  }
+  float rotationTolerance = 25;
 
   return distances.front >= frontMin &&
          distances.front <= frontMax &&
@@ -665,8 +668,7 @@ bool AutoReturnToStart::verifyStart() {
          distances.right <= rightMax &&
          distances.left >= leftMin &&
          distances.left <= leftMax &&
-         rotation >= rotationMin &&
-         rotation <= rotationMax;
+         angleDiff <= rotationTolerance;
 }
 
 }
