@@ -658,7 +658,7 @@ bool AutoReturnToStart::verifyStart() {
   while (angleDiff > 180) {
       angleDiff = 360 - angleDiff;
   }
-  double rotationTolerance = 25;
+  double rotationTolerance = 18;
 
   return distances.front >= frontMin &&
          distances.front <= frontMax &&
