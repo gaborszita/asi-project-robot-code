@@ -16,7 +16,7 @@ class LineFollower {
                DriveTrain &driveTrain,
                RobotCode::DeviceManagers::GyroManager& gyroManager,
                Logging::LidarLogManager& lidarLogManager);
-  void followLine();
+  void followLine(const std::vector<LineFollowerFSM::State::IntersectionDirection>& path, int pathRep);
  private:
   RobotCode::DeviceManagers::ReflectanceSensorManager &rsm;
   DriveTrain &driveTrain;

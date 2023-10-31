@@ -23,6 +23,7 @@
 #include "Utilities/PID.hpp"
 #include "RobotControl/LineFollower.hpp"
 #include "RobotControl/AutoReturnToStart.hpp"
+#include "Utilities/PathReader.hpp"
 
 using namespace RobotCode::DeviceManagers;
 using namespace RobotCode::Logging;
@@ -30,15 +31,14 @@ using namespace RobotCode::RobotControl;
 using namespace RobotCode::Utilities;
 
 int main() {
+  PathReader::PathParameters pathParameters;
+  PathReader::readPath("/home/pi/path.csv", pathParameters);
   TimeManager::resetStartTime();
-  LoggingController::init();
+  LoggingController::init(pathParameters.pathName);
   DeviceManager dm;
   dm.startup();
   LineFollower lf(dm.getReflectanceSensorManager(), dm.getDriveTrain(), dm.getGyroManager(), dm.getLidarLogManager());
-  //AutoReturnToStart as(dm.getLidarLogManager(), dm.getDriveTrain(), dm.getGyroManager(), dm.getReflectanceSensorManager());
-  //as.setTargetRotation(0);
-  //as.returnToStart();
-  lf.followLine();
+  lf.followLine(pathParameters.path, pathParameters.pathRep);
   dm.shutdown();
 
   return 0;

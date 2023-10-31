@@ -30,29 +30,9 @@ LineFollower::LineFollower(RobotCode::DeviceManagers::ReflectanceSensorManager &
   m_logger.add_attribute("Device", attrs::constant<std::string>("LineFollower"));
 }
 
-void LineFollower::followLine() {
-  //driveTrain.drive(DriveTrain::StrideLeft, DriveTrain::Medium);
-  //std::this_thread::sleep_for(std::chrono::milliseconds(3000000));
+void LineFollower::followLine(const std::vector<LineFollowerFSM::State::IntersectionDirection>& path, int pathRep) {
   std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-  std::vector<State::IntersectionDirection> path;
-  path.push_back(State::IntersectionDirection::Straight);
-  path.push_back(State::IntersectionDirection::Right);
-  path.push_back(State::IntersectionDirection::Right);
-  path.push_back(State::IntersectionDirection::Right);
-  path.push_back(State::IntersectionDirection::Straight);
-  path.push_back(State::IntersectionDirection::Right);
-  path.push_back(State::IntersectionDirection::Left);
-  path.push_back(State::IntersectionDirection::Left);
-  path.push_back(State::IntersectionDirection::Straight);
-  path.push_back(State::IntersectionDirection::Straight);
-  path.push_back(State::IntersectionDirection::Straight);
-  path.push_back(State::IntersectionDirection::Left);
-  path.push_back(State::IntersectionDirection::Straight);
-  path.push_back(State::IntersectionDirection::Straight);
-  path.push_back(State::IntersectionDirection::Left);
-  path.push_back(State::IntersectionDirection::Left);
-  path.push_back(State::IntersectionDirection::Left);
-  StateManager::getIntersectionState().setPath(path, 200);
+  StateManager::getIntersectionState().setPath(path, pathRep);
   AutoReturnToStart as(lidarLogManager, driveTrain, gyroManager, rsm);
   double lastStartAngle = gyroManager.getGyroZ();
   as.setTargetRotation(lastStartAngle);

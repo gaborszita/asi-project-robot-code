@@ -10,6 +10,7 @@ add_executable(
   DeviceManagers/DriveMotorManager.cpp
   Utilities/PID.cpp
   Utilities/TimeManager.cpp
+  Utilities/PathReader.cpp
   logging/LoggingController.cpp
   logging/LidarLogManager.cpp
   RobotControl/DeviceManager.cpp

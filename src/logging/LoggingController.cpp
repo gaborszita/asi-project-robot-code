@@ -17,7 +17,7 @@ namespace attrs = boost::log::attributes;
 
 namespace RobotCode::Logging {
 
-void LoggingController::init() {
+void LoggingController::init(const std::string& logFileName) {
   boost::shared_ptr<logging::core> core = logging::core::get();
 
   // Add common attributes like timestamp and log level
@@ -35,8 +35,8 @@ void LoggingController::init() {
   // Log sensor data to file
   boost::shared_ptr<sinks::text_file_backend> sensor_log_backend =
       boost::make_shared<sinks::text_file_backend>(
-          keywords::target = "/home/pi",
-          keywords::file_name = "/home/pi/%y_%m_%d_%H_%M_%S.log"
+          keywords::target = "/home/pi/logs",
+          keywords::file_name = "/home/pi/logs/" + logFileName + "_%y_%m_%d_%H_%M_%S.log"
       );
 
   typedef sinks::asynchronous_sink<sinks::text_file_backend> async_file_log;
