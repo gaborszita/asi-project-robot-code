@@ -21,6 +21,10 @@ class PathReader {
                        int& pathRep);
   static void readPath(const std::string& filePath,
                        PathParameters& pathParameters);
+
+ private:
+  static void processIntersection(const std::string& token,
+                                  std::vector<RobotCode::RobotControl::LineFollowerFSM::State::IntersectionDirection>& path);
 };
 
 }

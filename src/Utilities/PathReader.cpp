@@ -28,25 +28,31 @@ void PathReader::readPath(const std::string& filePath,
     } else if (i == 1) {
       pathRep = std::stoi(token);
     } else {
-      if (token == "Right") {
-        path.push_back(RobotCode::RobotControl::LineFollowerFSM::State::IntersectionDirection::Right);
-      } else if (token == "Straight") {
-        path.push_back(RobotCode::RobotControl::LineFollowerFSM::State::IntersectionDirection::Straight);
-      } else if (token == "Left") {
-        path.push_back(RobotCode::RobotControl::LineFollowerFSM::State::IntersectionDirection::Left);
-      } else {
-        throw std::runtime_error("Error reading path file: Invalid path direction: " + token);
-      }
+      processIntersection(token, path);
     }
     line.erase(0, pos + delimiter.length());
     i++;
   }
+  processIntersection(line, path);
   file.close();
 }
 
 void PathReader::readPath(const std::string& filePath,
                           PathParameters& pathParameters) {
   readPath(filePath, pathParameters.pathName, pathParameters.path, pathParameters.pathRep);
+}
+
+void PathReader::processIntersection(const std::string &token,
+                                     std::vector<RobotCode::RobotControl::LineFollowerFSM::State::IntersectionDirection> &path) {
+  if (token == "Right") {
+    path.push_back(RobotCode::RobotControl::LineFollowerFSM::State::IntersectionDirection::Right);
+  } else if (token == "Straight") {
+    path.push_back(RobotCode::RobotControl::LineFollowerFSM::State::IntersectionDirection::Straight);
+  } else if (token == "Left") {
+    path.push_back(RobotCode::RobotControl::LineFollowerFSM::State::IntersectionDirection::Left);
+  } else {
+    throw std::runtime_error("Error reading path file: Invalid path direction: " + token);
+  }
 }
 
 }
