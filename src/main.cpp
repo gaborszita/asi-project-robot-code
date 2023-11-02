@@ -37,10 +37,10 @@ namespace attrs = boost::log::attributes;
 
 int main(int argc, char* argv[]) {
   std::string path;
-  if (argc == 0) {
+  if (argc == 0 || argc == 1) {
     path = "/home/pi/path.csv";
-  } else if (argc == 1) {
-    path = argv[0];
+  } else if (argc == 2) {
+    path = argv[1];
   } else {
     std::cout << "Invalid arguments" << std::endl;
     return 1;
