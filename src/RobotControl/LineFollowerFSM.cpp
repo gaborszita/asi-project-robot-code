@@ -48,11 +48,11 @@ bool State::isEnd() {
 }
 
 bool State::isEndNormal() {
-  throw std::runtime_error("This state is not an end");
+  throw std::logic_error("This state is not an end");
 }
 
 std::string State::endStatus() {
-  throw std::runtime_error("This state is not an end");
+  throw std::logic_error("This state is not an end");
 }
 
 State &State::commonLineChooser(char sensorData) {
