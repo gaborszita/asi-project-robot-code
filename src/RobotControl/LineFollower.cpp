@@ -60,8 +60,8 @@ void LineFollower::followLine(const std::vector<LineFollowerFSM::State::Intersec
     }
 
     if (currentState == &StateManager::getErrorState() ||
-        (currentState == &StateManager::getPathEndState()
-        || currentState == &StateManager::getEndState() && !verifyResult)) {
+        ((currentState == &StateManager::getPathEndState()
+        || currentState == &StateManager::getEndState()) && !verifyResult)) {
       std::cout << "Error state or failed to verify start, auto return to start" << std::endl;
       auto time = std::chrono::system_clock::now();
       long long timeLog = std::chrono::duration_cast<std::chrono::nanoseconds>
