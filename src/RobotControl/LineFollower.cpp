@@ -59,18 +59,21 @@ void LineFollower::followLine(const std::vector<LineFollowerFSM::State::Intersec
       as.setTargetRotation(lastStartAngle);
     }
 
-    if ((currentState->isEnd() && !currentState->isEndNormal()) ||
-        (currentState == &StateManager::getPathEndState()) && !verifyResult) {
+    if (currentState == &StateManager::getErrorState() ||
+        (currentState == &StateManager::getPathEndState()
+        || currentState == &StateManager::getEndState() && !verifyResult)) {
+      std::cout << "Error state or failed to verify start, auto return to start" << std::endl;
+      auto time = std::chrono::system_clock::now();
+      long long timeLog = std::chrono::duration_cast<std::chrono::nanoseconds>
+          (time - TimeManager::getStartTime()).count();
+      BOOST_LOG(m_logger) << logging::add_value("DataTimeStamp", timeLog) <<
+                          "Error state or failed to verify start, auto return to start";
       as.returnToStart();
       StateManager::getIntersectionState().resetIntersectionCnt();
       StateManager::getIntersectionState().incrementPathRep();
       currentState = &StateManager::getStartState();
       lastStartAngle = gyroManager.getGyroZ();
       as.setTargetRotation(lastStartAngle);
-    }
-
-    if (currentState == &StateManager::getEndState() && !verifyResult) {
-      currentState = &StateManager::getErrorState();
     }
 
     auto timeNow = std::chrono::system_clock::now();
@@ -82,16 +85,18 @@ void LineFollower::followLine(const std::vector<LineFollowerFSM::State::Intersec
 
     if (timeNow - lastIntersectionTime > std::chrono::seconds (20) &&
         currentState != &StateManager::getPathEndState() &&
-        currentState != &StateManager::getEndState() &&
-        currentState != &StateManager::getErrorState()) {
+        currentState != &StateManager::getEndState()) {
       std::cout << "Robot stuck detected, auto return to start" << std::endl;
-      BOOST_LOG(m_logger) << logging::add_value("DataTimeStamp", timeNow) <<
-                          "Robot stuck detected";
+      auto time = std::chrono::system_clock::now();
+      long long timeLog = std::chrono::duration_cast<std::chrono::nanoseconds>
+          (time - TimeManager::getStartTime()).count();
+      BOOST_LOG(m_logger) << logging::add_value("DataTimeStamp", timeLog) <<
+                          "Robot stuck detected, auto return to start";
       as.returnToStart();
       StateManager::getIntersectionState().resetIntersectionCnt();
       StateManager::getIntersectionState().incrementPathRep();
       currentState = &StateManager::getStartState();
-      lastIntersectionTime = timeNow;
+      lastIntersectionTime = std::chrono::system_clock::now();
       lastStartAngle = gyroManager.getGyroZ();
       as.setTargetRotation(lastStartAngle);
     }
