@@ -65,7 +65,7 @@ class GyroManager {
 
   constexpr static const double GYRO_X_OFFSET = -2.56;
   constexpr static const double GYRO_Y_OFFSET = +1.02;
-  constexpr static const double GYRO_Z_OFFSET = +0.225;
+  constexpr static const double GYRO_Z_OFFSET = +0.16;
   constexpr static const double ACCEL_X_OFFSET = +0.066;
   constexpr static const double ACCEL_Y_OFFSET = +0.072;
   constexpr static const double ACCEL_Z_OFFSET = +0.96;
