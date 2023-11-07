@@ -207,9 +207,9 @@ void AutoReturnToStart::ensureStartDistance() {
     if (status.frontTooClose && status.backTooClose) {
       //std::cout << "bothfrontbacktooclose" << std::endl;
       if (status.rightCloser) {
-        driveTrain.drive(DriveTrain::StrideLeft, DriveTrain::Fast);
+        driveTrain.drive(DriveTrain::StrideLeft, DriveTrain::Slow);
       } else {
-        driveTrain.drive(DriveTrain::StrideRight, DriveTrain::Fast);
+        driveTrain.drive(DriveTrain::StrideRight, DriveTrain::Slow);
       }
       attemptedRgtLft = true;
     } else if (status.frontTooClose) {
@@ -230,11 +230,11 @@ void AutoReturnToStart::ensureStartDistance() {
       attemptedFrwBck = true;
     } else if (status.rightTooClose) {
       //std::cout << "striding" << std::endl;
-      driveTrain.drive(DriveTrain::StrideLeft, DriveTrain::Fast);
+      driveTrain.drive(DriveTrain::StrideLeft, DriveTrain::Slow);
       attemptedRgtLft = true;
     } else if (status.leftTooClose) {
       //std::cout << "striding" << std::endl;
-      driveTrain.drive(DriveTrain::StrideRight, DriveTrain::Fast);
+      driveTrain.drive(DriveTrain::StrideRight, DriveTrain::Slow);
       attemptedRgtLft = true;
     } else if (!attemptedFrwBck && status.frontInvalid) {
       driveTrain.drive(DriveTrain::Backward, DriveTrain::Fast);
@@ -260,7 +260,7 @@ void AutoReturnToStart::ensureStartDistance() {
       }
       attemptedFrwBck = true;
     } else if (!attemptedRgtLft && status.rightInvalid) {
-      driveTrain.drive(DriveTrain::StrideLeft, DriveTrain::Fast);
+      driveTrain.drive(DriveTrain::StrideLeft, DriveTrain::Slow);
       auto startTime = std::chrono::system_clock::now();
       while (std::chrono::system_clock::now() - startTime < std::chrono::milliseconds(1000)) {
         lidarLogManager.getScanData(nodes, nodeCount);
@@ -271,7 +271,7 @@ void AutoReturnToStart::ensureStartDistance() {
       }
       attemptedRgtLft = true;
     } else if (!attemptedRgtLft && status.leftInvalid) {
-      driveTrain.drive(DriveTrain::StrideRight, DriveTrain::Fast);
+      driveTrain.drive(DriveTrain::StrideRight, DriveTrain::Slow);
       auto startTime = std::chrono::system_clock::now();
       while (std::chrono::system_clock::now() - startTime < std::chrono::milliseconds(1000)) {
         lidarLogManager.getScanData(nodes, nodeCount);
@@ -471,13 +471,13 @@ void AutoReturnToStart::ensureRgtLftCorrectDistance() {
     lidarLogManager.getScanData(nodes, nodeCount);
     LidarDistances distances = getDistances(nodes, nodeCount);
     if (distances.right - distances.left < 0.2 && distances.right - distances.left >= 0) {
-      driveTrain.drive(DriveTrain::StrideLeft, DriveTrain::Fast);
+      driveTrain.drive(DriveTrain::StrideLeft, DriveTrain::Slow);
     } else if (distances.left - distances.right < 0.2 && distances.left - distances.right >= 0) {
-      driveTrain.drive(DriveTrain::StrideRight, DriveTrain::Fast);
+      driveTrain.drive(DriveTrain::StrideRight, DriveTrain::Slow);
     } else if (distances.right < 0.4) {
-      driveTrain.drive(DriveTrain::StrideLeft, DriveTrain::Fast);
+      driveTrain.drive(DriveTrain::StrideLeft, DriveTrain::Slow);
     } else if (distances.left < 0.4) {
-      driveTrain.drive(DriveTrain::StrideRight, DriveTrain::Fast);
+      driveTrain.drive(DriveTrain::StrideRight, DriveTrain::Slow);
     } else {
       driveTrain.stop();
       std::this_thread::sleep_for(std::chrono::milliseconds(200));
@@ -521,9 +521,9 @@ bool AutoReturnToStart::strideToPath() {
       driveTrain.stop();
       fail = true;
     } else if (distances.right - distances.left >= 0 && data == 0) {
-      driveTrain.drive(DriveTrain::StrideLeft, DriveTrain::Fast);
+      driveTrain.drive(DriveTrain::StrideLeft, DriveTrain::Slow);
     } else if (data == 0) {
-      driveTrain.drive(DriveTrain::StrideRight, DriveTrain::Fast);
+      driveTrain.drive(DriveTrain::StrideRight, DriveTrain::Slow);
     } else if (countSetBits(data) <= 3) {
       driveTrain.stop();
       std::this_thread::sleep_for(std::chrono::milliseconds(200));
