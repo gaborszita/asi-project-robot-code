@@ -8,6 +8,7 @@
 #include "DeviceManagers/ReflectanceSensorManager.hpp"
 #include "RobotControl/DriveTrain.hpp"
 #include "DeviceManagers/DriveMotorManager.hpp"
+#include "AprilTags/AprilTagManager.hpp"
 
 namespace RobotCode::RobotControl {
 
@@ -23,12 +24,14 @@ class DeviceManager {
   RobotCode::DeviceManagers::ReflectanceSensorManager &getReflectanceSensorManager();
   RobotCode::RobotControl::DriveTrain &getDriveTrain();
   RobotCode::DeviceManagers::DriveMotorManager &getDriveMotorManager();
+  RobotCode::AprilTags::AprilTagManager &getAprilTagManager();
  private:
   RobotCode::DeviceManagers::MouseManager mouseManager;
   RobotCode::DeviceManagers::GyroManager gyroManager;
   RobotCode::Logging::LidarLogManager lidarLogManager;
   RobotCode::DeviceManagers::ReflectanceSensorManager reflectanceSensorManager;
   RobotCode::RobotControl::DriveTrain driveTrain;
+  RobotCode::AprilTags::AprilTagManager aprilTagManager;
 };
 
 }

@@ -34,11 +34,16 @@ RobotCode::DeviceManagers::DriveMotorManager &DeviceManager::getDriveMotorManage
   return driveTrain.getDriveMotorManager();
 }
 
+RobotCode::AprilTags::AprilTagManager &DeviceManager::getAprilTagManager() {
+  return aprilTagManager;
+}
+
 void DeviceManager::startup() {
   mouseManager.quickStart();
   gyroManager.quickStart();
   lidarLogManager.quickStart();
   reflectanceSensorManager.quickStart();
+  aprilTagManager.quickStart();
 }
 
 void DeviceManager::shutdown() {
@@ -47,6 +52,7 @@ void DeviceManager::shutdown() {
   lidarLogManager.quickStop();
   reflectanceSensorManager.quickStop();
   driveTrain.stop();
+  aprilTagManager.quickStop();
 }
 
 }

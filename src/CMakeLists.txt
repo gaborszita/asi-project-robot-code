@@ -19,6 +19,8 @@ add_executable(
   RobotControl/LineFollowerFSM.cpp
   RobotControl/AutoReturnToStart.cpp
   RobotControl/LineFollowerFSMAutoReturnToStart.cpp
+  AprilTags/PositionEstimator.cpp
+  AprilTags/AprilTagManager.cpp
 )
 target_include_directories(robot_code PRIVATE ../include)
 
@@ -41,7 +43,7 @@ target_link_libraries(robot_code PRIVATE Adafruit_MotorHAT)
 ExternalProject_Add(
   rplidar_sdk_proj
   GIT_REPOSITORY https://github.com/gaborszita/rplidar_sdk
-  GIT_TAG 3cf88ab727a90861afa60319ab04aa6d292da2fe
+  GIT_TAG 66397cc5b0fb4db91070331be8ef7865c487e77c
   BUILD_COMMAND make -C sdk
   CONFIGURE_COMMAND ""
   INSTALL_COMMAND ""
@@ -65,3 +67,13 @@ target_include_directories(robot_code PRIVATE ${Boost_INCLUDE_DIRS})
 target_link_libraries(robot_code PRIVATE Boost::log)
 
 target_link_libraries(robot_code PRIVATE atomic)
+
+find_package(OpenCV REQUIRED)
+target_include_directories(robot_code PRIVATE ${OpenCV_INCLUDE_DIRS})
+target_link_libraries(robot_code PRIVATE ${OpenCV_LIBS})
+
+find_package(apriltag REQUIRED)
+target_include_directories(robot_code PRIVATE ${apriltag_INCLUDE_DIRS})
+target_link_libraries(robot_code PRIVATE ${apriltag_LIBS})
+target_link_libraries(robot_code PRIVATE "apriltag")
+message(STATUS ${apriltag_LIBS})
