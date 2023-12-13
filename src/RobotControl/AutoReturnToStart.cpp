@@ -643,17 +643,17 @@ bool AutoReturnToStart::verifyStart() {
       rotation += 360;
   }
   float frontGoalCm = 105;
-  float frontMin = (frontGoalCm - 9.5f)/100;
-  float frontMax = (frontGoalCm + 9.5f)/100;
+  float frontMin = (frontGoalCm - 15.5f)/100;
+  float frontMax = (frontGoalCm + 15.5f)/100;
   float backGoalCm = 42;
-  float backMin = (backGoalCm - 8)/100;
-  float backMax = (backGoalCm + 8)/100;
+  float backMin = (backGoalCm - 14)/100;
+  float backMax = (backGoalCm + 14)/100;
   float rightGoalCm = 86;
-  float rightMin = (rightGoalCm - 11.5f)/100;
-  float rightMax = (rightGoalCm + 11.5f)/100;
+  float rightMin = (rightGoalCm - 17.5f)/100;
+  float rightMax = (rightGoalCm + 17.5f)/100;
   float leftGoalCm = 94;
-  float leftMin = (leftGoalCm - 11.5f)/100;
-  float leftMax = (leftGoalCm + 11.5f)/100;
+  float leftMin = (leftGoalCm - 17.5f)/100;
+  float leftMax = (leftGoalCm + 17.5f)/100;
   double angleDiff = std::abs(rotation - m_targetRotation);
   while (angleDiff > 180) {
       angleDiff = 360 - angleDiff;
