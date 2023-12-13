@@ -87,7 +87,12 @@ void AprilTagManager::update() {
     if (detected) {
       std::vector<std::pair<PositionEstimator::CameraProperties, zarray_t *>> detectionsVector;
       detectionsVector.emplace_back(cameraProperties, detections);
-      robotPosition = PositionEstimator::getRobotPosition(detectionsVector);
+      try {
+        robotPosition = PositionEstimator::getRobotPosition(detectionsVector);
+      } catch (std::runtime_error& error) {
+        std::cout << "WARNING: Failed to get robot position: " << error.what() << std::endl;
+        detected = false;
+      }
       /*std::cout << "Robot position: " << robotPosition.x << ", " << robotPosition.y << ", " << robotPosition.z
                 << std::endl;
       std::cout << "Robot rotation: " << robotPosition.roll*180/3.14 << ", " << robotPosition.pitch*180/3.14 << ", " << robotPosition.yaw*180/3.14
