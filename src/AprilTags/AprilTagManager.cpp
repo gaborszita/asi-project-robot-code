@@ -48,11 +48,40 @@ void AprilTagManager::stopUpdateThread() {
 }
 
 void AprilTagManager::update() {
-  VideoCapture cap;
+  VideoCapture capBack;
+  VideoCapture capFront;
 
-  if (!cap.open(-1)) {
-    throw std::runtime_error("Failed to open video capture.");
+  if (!capBack.open(2)) {
+    throw std::runtime_error("Failed to open back video capture.");
+  } else if (!capFront.open(0)) {
+    throw std::runtime_error("Failed to open front video capture.");
   }
+
+  std::array<std::pair<VideoCapture, PositionEstimator::CameraProperties>, 2> captures;
+  PositionEstimator::CameraProperties backCameraProperties{};
+  backCameraProperties.fx = 1052.5/2;//992.8915/2;
+  backCameraProperties.fy = 1052.5/2;//992.8915/2;
+  backCameraProperties.cx = 639.5/2;
+  backCameraProperties.cy = 359.5/2;
+  backCameraProperties.x = 0.115;
+  backCameraProperties.y = 0;
+  backCameraProperties.z = 0;
+  backCameraProperties.roll = 180*std::numbers::pi/180;
+  backCameraProperties.pitch = 0;
+  backCameraProperties.yaw = 180*std::numbers::pi/180;
+  captures[0] = std::make_pair(capBack, backCameraProperties);
+  PositionEstimator::CameraProperties frontCameraProperties{};
+  frontCameraProperties.fx = 840.417;//992.8915/2;
+  frontCameraProperties.fy = 840.417;//992.8915/2;
+  frontCameraProperties.cx = 319.5;
+  frontCameraProperties.cy = 239.5;
+  frontCameraProperties.x = 0.092;
+  frontCameraProperties.y = 0;
+  frontCameraProperties.z = 0;
+  frontCameraProperties.roll = 0;
+  frontCameraProperties.pitch = 0;
+  frontCameraProperties.yaw = 0;
+  captures[1] = std::make_pair(capFront, frontCameraProperties);
 
   apriltag_detector_t *td = apriltag_detector_create();
   apriltag_family_t *tf = tagStandard41h12_create();
@@ -60,54 +89,52 @@ void AprilTagManager::update() {
   std::unique_lock<std::mutex> lock(threadMutex);
   while (!threadInterrupt) {
     lock.unlock();
-    Mat image, grayscaleImage;
-    if (!cap.read(image)) {
-      throw std::runtime_error("Failed to read image from video capture.");
-    }
+    std::vector<std::pair<PositionEstimator::CameraProperties, zarray_t *>> detectionsVector;
     auto timeNow = std::chrono::system_clock::now();
+    bool detected = false;
 
-    cvtColor(image, grayscaleImage, cv::COLOR_RGB2GRAY);
-    image_u8_t apriltagImage = {grayscaleImage.cols, grayscaleImage.rows, grayscaleImage.cols, grayscaleImage.data};
-    zarray_t *detections = apriltag_detector_detect(td, &apriltagImage);
+    std::array<Mat, captures.size()> images;
 
-    PositionEstimator::CameraProperties cameraProperties{};
-    cameraProperties.fx = 1052.5/2;//992.8915/2;
-    cameraProperties.fy = 1052.5/2;//992.8915/2;
-    cameraProperties.cx = 639.5/2;
-    cameraProperties.cy = 359.5/2;
-    cameraProperties.x = 0.115;
-    cameraProperties.y = 0;
-    cameraProperties.z = 0;
-    cameraProperties.roll = 180*std::numbers::pi/180;
-    cameraProperties.pitch = 0;
-    cameraProperties.yaw = 180*std::numbers::pi/180;
+    for (int i=0; i<captures.size(); i++) {
+      Mat image;
+      if (!captures[i].first.read(image)) {
+        throw std::runtime_error("Failed to read image from video capture.");
+      }
+      images[i] = image;
+    }
+
+    for (int i=0; i<captures.size(); i++) {
+      Mat image = images[i];
+      Mat grayscaleImage;
+
+      cvtColor(image, grayscaleImage, cv::COLOR_RGB2GRAY);
+      image_u8_t apriltagImage = {grayscaleImage.cols, grayscaleImage.rows, grayscaleImage.cols, grayscaleImage.data};
+      zarray_t *detections = apriltag_detector_detect(td, &apriltagImage);
+
+      detectionsVector.emplace_back(std::make_pair(captures[i].second, detections));
+      detected = detected || detections->size > 0;
+    }
 
     PositionEstimator::RobotPosition robotPosition{};
-    bool detected = detections->size > 0;
     if (detected) {
-      std::vector<std::pair<PositionEstimator::CameraProperties, zarray_t *>> detectionsVector;
-      detectionsVector.emplace_back(cameraProperties, detections);
       try {
         robotPosition = PositionEstimator::getRobotPosition(detectionsVector);
       } catch (std::runtime_error& error) {
         std::cout << "WARNING: Failed to get robot position: " << error.what() << std::endl;
         detected = false;
       }
-      /*std::cout << "Robot position: " << robotPosition.x << ", " << robotPosition.y << ", " << robotPosition.z
-                << std::endl;
-      std::cout << "Robot rotation: " << robotPosition.roll*180/3.14 << ", " << robotPosition.pitch*180/3.14 << ", " << robotPosition.yaw*180/3.14
-                << std::endl;*/
     }
-    apriltag_detections_destroy(detections);
 
-    //std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-
-
+    for (int i=0; i<captures.size(); i++) {
+      apriltag_detections_destroy(detectionsVector[i].second);
+    }
 
     lock.lock();
     if (detected) {
       long long timeLog = std::chrono::duration_cast<std::chrono::nanoseconds>
           (timeNow - TimeManager::getStartTime()).count();
+      //std::cout << "x: " << robotPosition.x << ", y: " << robotPosition.y << ", z: " << robotPosition.z << std::endl;
+      //std::cout << "yaw: " << 180/3.14*robotPosition.yaw << std::endl;
       BOOST_LOG(m_logger) << logging::add_value("DataTimeStamp",
                                                 timeLog)
                           << robotPosition.x << "," << robotPosition.y << "," << robotPosition.z << ","

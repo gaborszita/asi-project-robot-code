@@ -88,7 +88,7 @@ PositionEstimator::RobotPosition PositionEstimator::getRobotPosition(std::vector
   Mat cameraDetectedRotationVector(1, 3, CV_64F);
   cameraDetectedRotationVector.at<double>(0, 0) = 0;//-std::atan2(minDistanceDetectionPose.R->data[3], minDistanceDetectionPose.R->data[0]);
   cameraDetectedRotationVector.at<double>(0, 1) = 0;//std::atan2(minDistanceDetectionPose.R->data[7], minDistanceDetectionPose.R->data[8]);
-  cameraDetectedRotationVector.at<double>(0, 2) = -std::atan2(-minCostDetectionPose.R->data[6],
+  cameraDetectedRotationVector.at<double>(0, 2) = std::cos(minDistanceDetectionCameraProperties.roll)*std::atan2(-minCostDetectionPose.R->data[6],
                                                               std::sqrt(
                                                                   minCostDetectionPose.R->data[7]*minCostDetectionPose.R->data[7] +
                                                                   minCostDetectionPose.R->data[8]*minCostDetectionPose.R->data[8]
@@ -109,8 +109,10 @@ PositionEstimator::RobotPosition PositionEstimator::getRobotPosition(std::vector
   // calculate camera pose relative to tag
   Mat cameraPoseRelativeToTag = cameraDetectedRotationMatrix * cameraDetectedPose;
   cameraPoseRelativeToTag.at<double>(0, 0) = -cameraPoseRelativeToTag.at<double>(0, 0);
+  cameraPoseRelativeToTag.at<double>(1, 0) = -std::cos(minDistanceDetectionCameraProperties.roll)*cameraPoseRelativeToTag.at<double>(1, 0);
   //cameraPoseRelativeToTag.at<double>(1, 0) = -cameraPoseRelativeToTag.at<double>(1, 0);
   Mat cameraRotationRelativeToTag = -cameraDetectedRotationVector;
+  //cameraRotationRelativeToTag.at<double>(0, 2) = minDistanceDetectionCameraProperties.yaw;
 
   //std::cout << "Camera pose relative to tag" << cameraPoseRelativeToTag.at<double>(0, 0)
   //    << ", " << cameraPoseRelativeToTag.at<double>(1, 0)
@@ -154,7 +156,7 @@ PositionEstimator::RobotPosition PositionEstimator::getRobotPosition(std::vector
   robotPoseObject.z = 0;//robotPose.at<double>(2, 0); // not needed
   robotPoseObject.roll = 0;//robotRotation.at<double>(0, 0); // not getting correct value, need to fix, but getting only yaw is enough for now
   robotPoseObject.pitch = 0;//robotRotation.at<double>(0, 1); // not getting correct value, need to fix, but getting only yaw is enough for now
-  robotPoseObject.yaw = truncateAngle(robotRotation.at<double>(0, 2));
+  robotPoseObject.yaw = truncateAngle(robotRotation.at<double>(0, 2))*-std::cos(minDistanceDetectionCameraProperties.roll);
   robotPoseObject.tagRelativeX = minCostDetectionPose.t->data[2];
   robotPoseObject.tagRelativeY = minCostDetectionPose.t->data[0];
   robotPoseObject.tagRelativeZ = minCostDetectionPose.t->data[1];
