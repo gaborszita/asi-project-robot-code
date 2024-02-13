@@ -74,7 +74,7 @@ PositionEstimator::RobotPosition PositionEstimator::getRobotPosition(std::vector
   Mat aprilTagRotationVector(1, 3, CV_64F);
   aprilTagRotationVector.at<double>(0, 0) = tagProperties[minCostDetectionId].roll;
   aprilTagRotationVector.at<double>(0, 1) = tagProperties[minCostDetectionId].pitch;
-  aprilTagRotationVector.at<double>(0, 2) = tagProperties[minCostDetectionId].yaw;
+  aprilTagRotationVector.at<double>(0, 2) = tagProperties[minCostDetectionId].yaw*-std::cos(minDistanceDetectionCameraProperties.yaw);
 
   Mat aprilTagRotationMatrix(3, 3, CV_64F);
   Rodrigues(aprilTagRotationVector, aprilTagRotationMatrix);
