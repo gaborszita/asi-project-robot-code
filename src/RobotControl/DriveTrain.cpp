@@ -23,11 +23,11 @@ void DriveTrain::drive(RobotCode::RobotControl::DriveTrain::Direction direction,
                        RobotCode::RobotControl::DriveTrain::Speed speed) {
   char realSpeed;
   if (speed == Slow) {
-    realSpeed = 110;
+    realSpeed = 90;
   } else if (speed == Medium) {
-    realSpeed = 150;
+    realSpeed = 110;
   } else {
-    realSpeed = 150;
+    realSpeed = 110;
   }
   logData(direction, realSpeed, std::chrono::system_clock::now());
   switch (direction) {
