@@ -36,9 +36,9 @@ void LineFollower::followLine(const std::vector<LineFollowerFSM::State::Intersec
   AutoReturnToStart as(lidarLogManager, driveTrain, gyroManager, rsm);
   double lastStartAngle = gyroManager.getGyroZ();
   as.setTargetRotation(lastStartAngle);
-  if (!as.verifyStart()) {
+  /*if (!as.verifyStart()) {
     as.returnToStart();
-  }
+  }*/
   std::chrono::time_point<std::chrono::system_clock> lastIntersectionTime = std::chrono::system_clock::now();
   State *currentState = &StateManager::getStartState();
   currentState->runMotors(driveTrain);
@@ -49,7 +49,7 @@ void LineFollower::followLine(const std::vector<LineFollowerFSM::State::Intersec
 
     currentState = &currentState->getNextState(data);
 
-    bool verifyResult = false;
+    /*bool verifyResult = false;
     if (currentState == &StateManager::getPathEndState() || currentState == &StateManager::getEndState()) {
       verifyResult = as.verifyStart();
     }
@@ -74,7 +74,7 @@ void LineFollower::followLine(const std::vector<LineFollowerFSM::State::Intersec
       currentState = &StateManager::getStartState();
       lastStartAngle = gyroManager.getGyroZ();
       as.setTargetRotation(lastStartAngle);
-    }
+    }*/
 
     auto timeNow = std::chrono::system_clock::now();
 
