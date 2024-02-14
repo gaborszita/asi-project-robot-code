@@ -74,7 +74,7 @@ PositionEstimator::RobotPosition PositionEstimator::getRobotPosition(std::vector
   Mat aprilTagRotationVector(1, 3, CV_64F);
   aprilTagRotationVector.at<double>(0, 0) = tagProperties[minCostDetectionId].roll;
   aprilTagRotationVector.at<double>(0, 1) = tagProperties[minCostDetectionId].pitch;
-  aprilTagRotationVector.at<double>(0, 2) = tagProperties[minCostDetectionId].yaw*-std::cos(minDistanceDetectionCameraProperties.yaw);
+  aprilTagRotationVector.at<double>(0, 2) = tagProperties[minCostDetectionId].yaw;
 
   Mat aprilTagRotationMatrix(3, 3, CV_64F);
   Rodrigues(aprilTagRotationVector, aprilTagRotationMatrix);
@@ -112,7 +112,7 @@ PositionEstimator::RobotPosition PositionEstimator::getRobotPosition(std::vector
   cameraPoseRelativeToTag.at<double>(1, 0) = -std::cos(minDistanceDetectionCameraProperties.roll)*cameraPoseRelativeToTag.at<double>(1, 0);
   //cameraPoseRelativeToTag.at<double>(1, 0) = -cameraPoseRelativeToTag.at<double>(1, 0);
   Mat cameraRotationRelativeToTag = -cameraDetectedRotationVector;
-  //cameraRotationRelativeToTag.at<double>(0, 2) = minDistanceDetectionCameraProperties.yaw;
+  cameraRotationRelativeToTag.at<double>(0, 2) = -std::cos(minDistanceDetectionCameraProperties.roll)*cameraRotationRelativeToTag.at<double>(0, 2);
 
   //std::cout << "Camera pose relative to tag" << cameraPoseRelativeToTag.at<double>(0, 0)
   //    << ", " << cameraPoseRelativeToTag.at<double>(1, 0)
@@ -156,7 +156,7 @@ PositionEstimator::RobotPosition PositionEstimator::getRobotPosition(std::vector
   robotPoseObject.z = 0;//robotPose.at<double>(2, 0); // not needed
   robotPoseObject.roll = 0;//robotRotation.at<double>(0, 0); // not getting correct value, need to fix, but getting only yaw is enough for now
   robotPoseObject.pitch = 0;//robotRotation.at<double>(0, 1); // not getting correct value, need to fix, but getting only yaw is enough for now
-  robotPoseObject.yaw = truncateAngle(robotRotation.at<double>(0, 2))*-std::cos(minDistanceDetectionCameraProperties.roll);
+  robotPoseObject.yaw = truncateAngle(robotRotation.at<double>(0, 2));
   robotPoseObject.tagRelativeX = minCostDetectionPose.t->data[2];
   robotPoseObject.tagRelativeY = minCostDetectionPose.t->data[0];
   robotPoseObject.tagRelativeZ = minCostDetectionPose.t->data[1];
